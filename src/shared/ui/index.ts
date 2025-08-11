@@ -6,7 +6,7 @@ export { Dialog, DialogContent, DialogHeader, DialogOverlay, DialogPortal, Dialo
 export type { DialogContentProps, DialogHeaderProps, DialogTitleProps } from "./Dialog"
 export { Input } from "./Input"
 export type { InputProps } from "./Input"
-export { Select, SelectContent, SelectGroup, SelectItem, SelectValue } from "./Select"
+export { Select, SelectContent, SelectGroup, SelectItem, SelectValue, SelectTrigger } from "./Select"
 export type { SelectContentProps, SelectItemProps, SelectTriggerProps } from "./Select"
 export { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./Table"
 export type {
