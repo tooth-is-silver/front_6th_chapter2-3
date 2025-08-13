@@ -1,13 +1,5 @@
 import { axiosInstance } from "../../../shared/utils/axios"
-import {
-  getPostsParams,
-  PostsData,
-  PostsTags,
-  CreatePostsRequest,
-  UpdatePostsRequest,
-  CreatePostsResponse,
-  UpdatePostsResponse,
-} from "./types"
+import { getPostsParams, PostsData, PostsTags } from "./types"
 
 export const getPosts = async (params: getPostsParams) => {
   const searchParams = new URLSearchParams({
@@ -32,20 +24,4 @@ export const getPostsSearch = async (q: string) => {
   })
 
   return axiosInstance.get<PostsData>(`/posts/search?${searchParams}`)
-}
-
-export const createPosts = async (data: CreatePostsRequest) => {
-  return axiosInstance.post<CreatePostsResponse>(`/api/posts/add`, {
-    data,
-  })
-}
-
-export const updatePosts = async (postId: number, data: UpdatePostsRequest) => {
-  return axiosInstance.put<UpdatePostsResponse>(`/api/posts/${postId}`, {
-    data,
-  })
-}
-
-export const deletePosts = async (postId: number) => {
-  return axiosInstance.delete(`/api/posts/${postId}`)
 }
