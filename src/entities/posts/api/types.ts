@@ -3,7 +3,7 @@ export interface getPostsParams {
   skip?: string
 }
 
-export interface Posts {
+export interface Post {
   id: number
   title: string
   body: string
@@ -17,7 +17,7 @@ export interface Posts {
 }
 
 export interface PostsData {
-  posts: Array<Posts>
+  posts: Array<Post>
   total: number
   skip: number
   limit: number

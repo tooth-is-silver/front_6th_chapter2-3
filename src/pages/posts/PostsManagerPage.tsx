@@ -11,6 +11,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  highlightText,
   Input,
   Select,
   SelectContent,
@@ -19,6 +20,26 @@ import {
   SelectValue,
   Textarea,
 } from "../../shared/ui"
+import { Post } from "../../entities/posts"
+import { Users } from "../../entities/users"
+import { EditPostDialog, Pagination, PostTable } from "../../widgets"
+import { AddPostDialog } from "../../widgets/add-post-dialog/AddPostDialog"
+
+export interface PostsWithUsers extends Post {
+  author: Users
+}
+
+export interface NewPost {
+  title: string
+  body: string
+  userId: number
+}
+
+export interface SelectedPost {
+  id: number | null
+  title: string
+  body: string
+}
 
 const PostsManager = () => {
   const navigate = useNavigate()
@@ -26,17 +47,21 @@ const PostsManager = () => {
   const queryParams = new URLSearchParams(location.search)
 
   // 상태 관리
-  const [posts, setPosts] = useState([])
+  const [posts, setPosts] = useState<Array<PostsWithUsers>>([])
   const [total, setTotal] = useState(0)
   const [skip, setSkip] = useState(parseInt(queryParams.get("skip") || "0"))
   const [limit, setLimit] = useState(parseInt(queryParams.get("limit") || "10"))
   const [searchQuery, setSearchQuery] = useState(queryParams.get("search") || "")
-  const [selectedPost, setSelectedPost] = useState(null)
+  const [selectedPost, setSelectedPost] = useState<SelectedPost>({
+    id: null,
+    title: "",
+    body: "",
+  })
   const [sortBy, setSortBy] = useState(queryParams.get("sortBy") || "")
   const [sortOrder, setSortOrder] = useState(queryParams.get("sortOrder") || "asc")
   const [showAddDialog, setShowAddDialog] = useState(false)
   const [showEditDialog, setShowEditDialog] = useState(false)
-  const [newPost, setNewPost] = useState({ title: "", body: "", userId: 1 })
+  const [newPost, setNewPost] = useState<NewPost>({ title: "", body: "", userId: 1 })
   const [loading, setLoading] = useState(false)
   const [tags, setTags] = useState([])
   const [selectedTag, setSelectedTag] = useState(queryParams.get("tag") || "")
@@ -182,19 +207,19 @@ const PostsManager = () => {
   }
 
   // 게시물 삭제
-  const deletePost = async (id) => {
+  const deletePost = async (postId: number) => {
     try {
-      await fetch(`/api/posts/${id}`, {
+      await fetch(`/api/posts/${postId}`, {
         method: "DELETE",
       })
-      setPosts(posts.filter((post) => post.id !== id))
+      setPosts(posts.filter((post) => post.id !== postId))
     } catch (error) {
       console.error("게시물 삭제 오류:", error)
     }
   }
 
   // 댓글 가져오기
-  const fetchComments = async (postId) => {
+  const fetchComments = async (postId: number) => {
     if (comments[postId]) return // 이미 불러온 댓글이 있으면 다시 불러오지 않음
     try {
       const response = await fetch(`/api/comments/post/${postId}`)
@@ -260,9 +285,9 @@ const PostsManager = () => {
   }
 
   // 댓글 좋아요
-  const likeComment = async (id, postId) => {
+  const likeComment = async (commentId: number, postId: number) => {
     try {
-      const response = await fetch(`/api/comments/${id}`, {
+      const response = await fetch(`/api/comments/${commentId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ likes: comments[postId].find((c) => c.id === id).likes + 1 }),
@@ -291,11 +316,22 @@ const PostsManager = () => {
     try {
       const response = await fetch(`/api/users/${user.id}`)
       const userData = await response.json()
+      // setState부분은 useMutation에서 onSuccess로 전달
       setSelectedUser(userData)
       setShowUserModal(true)
     } catch (error) {
       console.error("사용자 정보 가져오기 오류:", error)
     }
+  }
+
+  const filteredPostTag = (tag) => {
+    setSelectedTag(tag)
+    updateURL()
+  }
+
+  const openEditDialog = (selectedPost, isEditDialog: boolean) => {
+    setSelectedPost(selectedPost)
+    setShowEditDialog(isEditDialog)
   }
 
   useEffect(() => {
@@ -439,87 +475,43 @@ const PostsManager = () => {
           </div>
 
           {/* 게시물 테이블 */}
-          {loading ? <div className="flex justify-center p-4">로딩 중...</div> : renderPostTable()}
+          {loading ? (
+            <div className="flex justify-center p-4">로딩 중...</div>
+          ) : (
+            <PostTable
+              posts={posts}
+              searchQuery={searchQuery}
+              selectedTag={selectedTag}
+              openUserModal={openUserModal}
+              openPostDetail={openPostDetail}
+              deletePost={deletePost}
+              filteredPostTag={filteredPostTag}
+              openEditDialog={openEditDialog}
+            />
+          )}
 
           {/* 페이지네이션 */}
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <span>표시</span>
-              <Select value={limit.toString()} onValueChange={(value) => setLimit(Number(value))}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="10" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="10">10</SelectItem>
-                  <SelectItem value="20">20</SelectItem>
-                  <SelectItem value="30">30</SelectItem>
-                </SelectContent>
-              </Select>
-              <span>항목</span>
-            </div>
-            <div className="flex gap-2">
-              <Button disabled={skip === 0} onClick={() => setSkip(Math.max(0, skip - limit))}>
-                이전
-              </Button>
-              <Button disabled={skip + limit >= total} onClick={() => setSkip(skip + limit)}>
-                다음
-              </Button>
-            </div>
-          </div>
+          <Pagination limit={limit} setLimit={setLimit} skip={skip} setSkip={setSkip} total={total} />
         </div>
       </CardContent>
 
       {/* 게시물 추가 대화상자 */}
-      <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>새 게시물 추가</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <Input
-              placeholder="제목"
-              value={newPost.title}
-              onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
-            />
-            <Textarea
-              rows={30}
-              placeholder="내용"
-              value={newPost.body}
-              onChange={(e) => setNewPost({ ...newPost, body: e.target.value })}
-            />
-            <Input
-              type="number"
-              placeholder="사용자 ID"
-              value={newPost.userId}
-              onChange={(e) => setNewPost({ ...newPost, userId: Number(e.target.value) })}
-            />
-            <Button onClick={addPost}>게시물 추가</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <AddPostDialog
+        newPost={newPost}
+        setNewPost={setNewPost}
+        showAddDialog={showAddDialog}
+        setShowAddDialog={setShowAddDialog}
+        addPost={addPost}
+      />
 
       {/* 게시물 수정 대화상자 */}
-      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>게시물 수정</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <Input
-              placeholder="제목"
-              value={selectedPost?.title || ""}
-              onChange={(e) => setSelectedPost({ ...selectedPost, title: e.target.value })}
-            />
-            <Textarea
-              rows={15}
-              placeholder="내용"
-              value={selectedPost?.body || ""}
-              onChange={(e) => setSelectedPost({ ...selectedPost, body: e.target.value })}
-            />
-            <Button onClick={updatePost}>게시물 업데이트</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <EditPostDialog
+        selectedPost={selectedPost}
+        setSelectedPost={setSelectedPost}
+        showEditDialog={showEditDialog}
+        setShowEditDialog={setShowEditDialog}
+        updatePost={updatePost}
+      />
 
       {/* 댓글 추가 대화상자 */}
       <Dialog open={showAddCommentDialog} onOpenChange={setShowAddCommentDialog}>

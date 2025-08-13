@@ -1,1 +1,6 @@
-export { Header, Footer } from "./layout"
+export * from "./layout/Footer"
+export * from "./layout/Header"
+export * from "./post-table/PostTable"
+export * from "./add-post-dialog/AddPostDialog"
+export * from "./edit-post-dialog/EditPostDialog"
+export * from "./pagination/Pagination"

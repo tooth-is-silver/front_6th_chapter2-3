@@ -1,3 +1,5 @@
+import { Post } from "../api/types"
+
 export interface CreatePostsRequest {
   title: string
   body: string
@@ -25,4 +27,9 @@ export interface UpdatePostsResponse {
     likes: number
     dislikes: number
   }
+}
+
+export interface DeletePostsResponse extends Post {
+  isDeleted: boolean
+  deletedOn: string
 }

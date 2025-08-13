@@ -1,5 +1,11 @@
 import { axiosInstance } from "../../../shared/utils/axios"
-import { CreatePostsRequest, CreatePostsResponse, UpdatePostsRequest, UpdatePostsResponse } from "./types"
+import {
+  CreatePostsRequest,
+  CreatePostsResponse,
+  DeletePostsResponse,
+  UpdatePostsRequest,
+  UpdatePostsResponse,
+} from "./types"
 
 export const createPosts = async (data: CreatePostsRequest) => {
   return axiosInstance.post<CreatePostsResponse>(`/api/posts/add`, {
@@ -14,5 +20,5 @@ export const updatePosts = async (postId: number, data: UpdatePostsRequest) => {
 }
 
 export const deletePosts = async (postId: number) => {
-  return axiosInstance.delete(`/api/posts/${postId}`)
+  return axiosInstance.delete<DeletePostsResponse>(`/api/posts/${postId}`)
 }
