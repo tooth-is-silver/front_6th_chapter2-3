@@ -23,26 +23,10 @@ import {
   getPostsTags,
   getPostsTagTagName,
   Post,
-  PostsData,
   PostsTags,
   updatePosts,
 } from "../../entities/posts"
 import { getUserInfo, getUsers, getUsersData, getUsersParams, UserInfo } from "../../entities/users"
-import {
-  AddPostDialog,
-  EditPostDialog,
-  Pagination,
-  PostTable,
-  PostComments,
-  AddCommentDialog,
-  EditCommentDialog,
-  PostDetailDialog,
-  UserDialog,
-  PostsWithUsers,
-  NewPost,
-  NewComment,
-  PostCommentsObj,
-} from "../../widgets"
 import { Comments } from "../../entities/comments/api/types"
 import {
   usePagination,
@@ -60,6 +44,15 @@ import {
   updateCommentsLikes,
   UpdateCommentsLikesRequest,
 } from "../../entities/comments"
+import { AddCommentForm, NewComment } from "../../features/comments/add-comment"
+import { AddPostForm, NewPost } from "../../features/posts/add-post"
+import { PostDetailDialog } from "../../features/posts/post-detail"
+import { Pagination } from "../../widgets"
+import { PostList, PostsWithUsers } from "../../features/posts/post-list"
+import { EditCommentForm } from "../../features/comments/edit-comment"
+import { EditPostForm } from "../../features/posts/edit-post"
+import { UserInfoDialog } from "../../features/user/user-info"
+import { CommentList, CommentsObj } from "../../features/comments/comment-list/ui/CommentList"
 
 const PostsManager = () => {
   const navigate = useNavigate()
@@ -80,7 +73,7 @@ const PostsManager = () => {
   // 로컬 상태
   const [selectedPost, setSelectedPost] = useState<Post | null>(null)
   const [tags, setTags] = useState<Array<PostsTags>>([])
-  const [comments, setComments] = useState<PostCommentsObj>({})
+  const [comments, setComments] = useState<CommentsObj>({})
   const [selectedComment, setSelectedComment] = useState<Comments | null>(null)
   const [newComment, setNewComment] = useState<NewComment>({ body: "", postId: null, userId: 1 })
   const [selectedUser, setSelectedUser] = useState<UserInfo | null>(null)
@@ -174,13 +167,16 @@ const PostsManager = () => {
     setLoading(true)
     try {
       const [postsTagTagNameRes, usersRes] = await Promise.all([
-        getPostsTagTagName(tagName),
+        getPostsTagTagName(tagName, {
+          limit,
+          skip: skip.toString(),
+        }),
         getUsers({
           limit: 0,
           select: "username,image",
         }),
       ])
-      const postsData = postsTagTagNameRes.data as PostsData
+      const postsData = postsTagTagNameRes.data
       const usersData = usersRes.data as getUsersData
 
       const postsWithUsers = postsData.posts.map((post) => ({
@@ -462,7 +458,7 @@ const PostsManager = () => {
           {loading ? (
             <div className="flex justify-center p-4">로딩 중...</div>
           ) : (
-            <PostTable
+            <PostList
               posts={posts}
               selectedTag={selectedTag}
               openUserModal={openUserModal}
@@ -479,18 +475,18 @@ const PostsManager = () => {
       </CardContent>
 
       {/* 게시물 추가 대화상자 */}
-      <AddPostDialog newPost={newPost} setNewPost={setNewPost} addPost={addPost} />
+      <AddPostForm newPost={newPost} setNewPost={setNewPost} addPost={addPost} />
 
       {/* 게시물 수정 대화상자 */}
       {selectedPost && (
-        <EditPostDialog selectedPost={selectedPost} setSelectedPost={setSelectedPost} updatePost={updatePost} />
+        <EditPostForm selectedPost={selectedPost} setSelectedPost={setSelectedPost} updatePost={updatePost} />
       )}
 
       {/* 댓글 추가 대화상자 */}
-      <AddCommentDialog newComment={newComment} setNewComment={setNewComment} addComment={addComment} />
+      <AddCommentForm newComment={newComment} setNewComment={setNewComment} addComment={addComment} />
 
       {/* 댓글 수정 대화상자 */}
-      <EditCommentDialog
+      <EditCommentForm
         selectedComment={selectedComment}
         setSelectedComment={setSelectedComment}
         updateComment={updateComment}
@@ -501,7 +497,7 @@ const PostsManager = () => {
         <PostDetailDialog
           selectedPost={selectedPost}
           children={
-            <PostComments
+            <CommentList
               postId={selectedPost.id}
               comments={comments}
               likeComment={likeComment}
@@ -514,7 +510,7 @@ const PostsManager = () => {
       )}
 
       {/* 사용자 모달 */}
-      <UserDialog selectedUser={selectedUser} />
+      <UserInfoDialog selectedUser={selectedUser} />
     </Card>
   )
 }
