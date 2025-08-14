@@ -1,24 +1,30 @@
-import { createComments } from "../../../../entities/comments"
+import { useQueryClient } from "@tanstack/react-query"
 import { useCommentDialogs } from "../../../../shared/store"
-import { useComments, useNewComment } from "../../model"
+import { useNewComment } from "../../model"
+import { useAddCommentMutation, commentsKeys } from "../../model/queries"
 
 export const useAddComment = () => {
   const { newComment, setNewComment } = useNewComment()
-  const { setComments } = useComments()
   const { setShowAddCommentDialog } = useCommentDialogs()
+  const addCommentMutation = useAddCommentMutation()
+  const queryClient = useQueryClient()
 
   const addComment = async () => {
+    if (!newComment.postId) return
+    
     try {
-      const response = await createComments(newComment)
-      const data = response.data
-      setComments((prev) => ({
-        ...prev,
-        [data.postId]: [...(prev[data.postId] || []), { ...data, likes: 0 }],
-      }))
-      setShowAddCommentDialog(false)
+      await addCommentMutation.mutateAsync(newComment)
+      
+      // 성공 시 처리
       setNewComment({ body: "", postId: null, userId: 1 })
+      setShowAddCommentDialog(false)
+      queryClient.invalidateQueries({ queryKey: commentsKeys.list(newComment.postId) })
     } catch (error) {
       console.error("댓글 추가 오류:", error)
+      // 실패 시 롤백
+      if (newComment.postId) {
+        queryClient.invalidateQueries({ queryKey: commentsKeys.list(newComment.postId) })
+      }
     }
   }
 
@@ -27,5 +33,9 @@ export const useAddComment = () => {
     setShowAddCommentDialog(true)
   }
 
-  return { addComment, addPostComment }
+  return { 
+    addComment, 
+    addPostComment,
+    isLoading: addCommentMutation.isPending
+  }
 }

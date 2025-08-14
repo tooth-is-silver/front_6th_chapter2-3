@@ -3,7 +3,7 @@ import { Button, highlightText } from "../../../../shared/ui"
 import { Comments } from "../../../../entities/comments/api/types"
 import { useSearchFilter } from "../../../../shared/store"
 import { useSelectedPost } from "../../../posts/model"
-import { useComments } from "../../model"
+import { useCommentsQuery } from "../../model/queries"
 import { useAddComment } from "../../add-comment"
 import { useEditComment } from "../../edit-comment"
 import { useCommentList } from "../model/useCommentList"
@@ -12,16 +12,19 @@ export interface CommentsObj {
   [key: number]: Array<Comments>
 }
 export const CommentList = () => {
-  const { comments } = useComments()
+  const { selectedPost } = useSelectedPost()
   const { deletePostComment, likeComment } = useCommentList()
   const { addPostComment } = useAddComment()
   const { editPostComment } = useEditComment()
-  const { selectedPost } = useSelectedPost()
   const { searchQuery } = useSearchFilter()
 
   if (!selectedPost) return
 
   const postId = selectedPost.id
+  const { data: comments = [], isLoading, error } = useCommentsQuery(postId)
+
+  if (isLoading) return <div className="mt-2 text-center">댓글 로딩 중...</div>
+  if (error) return <div className="mt-2 text-center text-red-500">댓글 로드 오류</div>
 
   return (
     <div className="mt-2">
@@ -33,7 +36,7 @@ export const CommentList = () => {
         </Button>
       </div>
       <div className="space-y-1">
-        {comments[postId]?.map((comment) => (
+        {comments?.map((comment: Comments) => (
           <div key={comment.id} className="flex items-center justify-between text-sm border-b pb-1">
             <div className="flex items-center space-x-2 overflow-hidden">
               <span className="font-medium truncate">{comment.user.username}:</span>

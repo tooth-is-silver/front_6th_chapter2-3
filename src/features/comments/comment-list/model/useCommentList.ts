@@ -1,57 +1,49 @@
-import { SetStateAction } from "react"
+import { useQueryClient } from "@tanstack/react-query"
 import {
-  getCommentsPost,
-  deleteComments,
-  updateCommentsLikes,
-  UpdateCommentsLikesRequest,
-} from "../../../../entities/comments"
-import type { CommentsObj } from "../ui/CommentList"
-import { useComments } from "../../model"
+  useDeleteCommentMutation,
+  useLikeCommentMutation,
+  commentsKeys
+} from "../../model/queries"
 
 export const useCommentList = () => {
-  const { comments, setComments } = useComments()
+  const queryClient = useQueryClient()
+  const deleteCommentMutation = useDeleteCommentMutation()
+  const likeCommentMutation = useLikeCommentMutation()
 
-  const fetchComments = async (postId: number) => {
-    if (comments[postId]) return // 이미 불러온 댓글이 있으면 다시 불러오지 않음
-    try {
-      const response = await getCommentsPost(postId)
-      const data = response.data
-      setComments((prev) => ({ ...prev, [postId]: data.comments }))
-    } catch (error) {
-      console.error("댓글 가져오기 오류:", error)
-    }
+  const fetchComments = (postId: number) => {
+    // React Query의 useCommentsQuery를 직접 사용하도록 변경됨
+    // 이 함수는 더 이상 필요하지 않지만 호환성을 위해 유지
+    queryClient.invalidateQueries({ queryKey: commentsKeys.list(postId) })
   }
 
   const deletePostComment = async (commentId: number, postId: number) => {
     try {
-      await deleteComments(commentId)
-      setComments((prev) => ({
-        ...prev,
-        [postId]: prev[postId].filter((comment) => comment.id !== commentId),
-      }))
+      await deleteCommentMutation.mutateAsync(commentId)
+      
+      // 성공 시 처리
+      queryClient.invalidateQueries({ queryKey: commentsKeys.list(postId) })
     } catch (error) {
       console.error("댓글 삭제 오류:", error)
+      // 실패 시 롤백
+      queryClient.invalidateQueries({ queryKey: commentsKeys.list(postId) })
     }
   }
 
   const likeComment = async (commentId: number, postId: number) => {
     try {
-      const body: UpdateCommentsLikesRequest = {
-        likes:
-          comments[postId] && comments[postId].find((c) => c.id === commentId)
-            ? comments[postId].find((c) => c.id === commentId)!.likes + 1
-            : 1,
-      }
-      const response = await updateCommentsLikes(commentId, body)
-      const data = response.data
-      setComments((prev) => ({
-        ...prev,
-        [postId]: prev[postId].map((comment) =>
-          comment.id === data.id ? { ...data, likes: comment.likes + 1 } : comment,
-        ),
-      }))
+      // 현재 댓글 데이터를 가져와서 likes 계산
+      const currentComments = queryClient.getQueryData(commentsKeys.list(postId)) as any[]
+      const currentComment = currentComments?.find(c => c.id === commentId)
+      const newLikes = currentComment ? currentComment.likes + 1 : 1
+
+      await likeCommentMutation.mutateAsync({ commentId, likes: newLikes })
+      
+      // 성공 시 처리
+      queryClient.invalidateQueries({ queryKey: commentsKeys.list(postId) })
     } catch (error) {
       console.error("댓글 좋아요 오류:", error)
+      // 실패 시 롤백
+      queryClient.invalidateQueries({ queryKey: commentsKeys.list(postId) })
     }
   }
 
@@ -59,5 +51,7 @@ export const useCommentList = () => {
     fetchComments,
     deletePostComment,
     likeComment,
+    isDeleting: deleteCommentMutation.isPending,
+    isLiking: likeCommentMutation.isPending,
   }
 }
