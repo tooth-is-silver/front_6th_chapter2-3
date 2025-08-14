@@ -1,37 +1,41 @@
-import { updatePosts } from "../../../../entities/posts"
+import { useQueryClient } from "@tanstack/react-query"
 import { usePostDialogs } from "../../../../shared/store"
 import type { Post } from "../../../../entities/posts/api/types"
-import { usePosts, useSelectedPost } from "../../model"
+import { useSelectedPost } from "../../model"
+import { useUpdatePostMutation, useDeletePostMutation, postsKeys } from "../../model/queries"
 
 export const useEditPost = () => {
-  const { posts, setPosts } = usePosts()
   const { setSelectedPost } = useSelectedPost()
   const { setShowEditDialog } = usePostDialogs()
+  const updatePostMutation = useUpdatePostMutation()
+  const deletePostMutation = useDeletePostMutation()
+  const queryClient = useQueryClient()
 
   const updatePost = async (selectedPost: Post) => {
     if (!selectedPost) return
     try {
-      const response = await updatePosts(selectedPost.id, selectedPost)
-      const data = response.data
-
-      const updatedPost: Post = {
-        ...data,
-        views: selectedPost.views,
-      }
-      setPosts(posts.map((post) => (post.id === updatedPost.id ? updatedPost : post)))
+      await updatePostMutation.mutateAsync({ id: selectedPost.id, post: selectedPost })
+      
+      // 성공 시 처리
       setShowEditDialog(false)
+      queryClient.invalidateQueries({ queryKey: postsKeys.lists() })
     } catch (error) {
       console.error("게시물 업데이트 오류:", error)
+      // 실패 시 롤백
+      queryClient.invalidateQueries({ queryKey: postsKeys.lists() })
     }
   }
 
   const deletePost = async (postId: number) => {
     try {
-      const { deletePosts } = await import("../../../../entities/posts")
-      await deletePosts(postId)
-      setPosts(posts.filter((post) => post.id !== postId))
+      await deletePostMutation.mutateAsync(postId)
+      
+      // 성공 시 처리
+      queryClient.invalidateQueries({ queryKey: postsKeys.lists() })
     } catch (error) {
       console.error("게시물 삭제 오류:", error)
+      // 실패 시 롤백
+      queryClient.invalidateQueries({ queryKey: postsKeys.lists() })
     }
   }
 
@@ -40,5 +44,11 @@ export const useEditPost = () => {
     setShowEditDialog(true)
   }
 
-  return { updatePost, deletePost, openEditDialog }
+  return { 
+    updatePost, 
+    deletePost, 
+    openEditDialog,
+    isUpdating: updatePostMutation.isPending,
+    isDeleting: deletePostMutation.isPending
+  }
 }

@@ -14,13 +14,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../shared/ui"
-import { usePagination, useSearchFilter, useLoading, usePostDialogs } from "../../shared/store"
-import { useTags } from "../../features/posts/model"
+import { usePagination, useSearchFilter, usePostDialogs } from "../../shared/store"
+import { useTagsQuery } from "../../features/posts/model/queries"
 import { AddCommentForm } from "../../features/comments/add-comment"
 import { AddPostForm } from "../../features/posts/add-post"
 import { PostDetailDialog } from "../../features/posts/post-detail"
 import { Pagination } from "../../widgets"
-import { PostList, usePostList } from "../../features/posts/post-list"
+import { PostList } from "../../features/posts/post-list"
 import { EditCommentForm } from "../../features/comments/edit-comment"
 import { EditPostForm } from "../../features/posts/edit-post"
 import { UserInfoDialog } from "../../features/user/user-info"
@@ -31,12 +31,11 @@ const PostsManager = () => {
   const location = useLocation()
 
   // 전역 상태 훅 사용
-  const { skip, setSkip, limit, setLimit, setTotal } = usePagination()
+  const { skip, setSkip, limit, setLimit } = usePagination()
   const { searchQuery, setSearchQuery, selectedTag, setSelectedTag, sortBy, setSortBy, sortOrder, setSortOrder } =
     useSearchFilter()
-  const { loading } = useLoading()
   const { setShowAddDialog } = usePostDialogs()
-  const { tags } = useTags()
+  const { data: tags = [] } = useTagsQuery()
 
   // URL 업데이트 함수
   const updateURL = () => {
@@ -49,18 +48,9 @@ const PostsManager = () => {
     if (selectedTag) params.set("tag", selectedTag)
     navigate(`?${params.toString()}`)
   }
-  const { loadData, searchPosts, fetchPostsByTag, fetchTags } = usePostList()
 
+  // URL 동기화를 위한 useEffect
   useEffect(() => {
-    fetchTags()
-  }, [])
-
-  useEffect(() => {
-    if (selectedTag) {
-      fetchPostsByTag(selectedTag, limit, skip, setTotal, () => loadData(limit, skip, setTotal))
-    } else {
-      loadData(limit, skip, setTotal)
-    }
     updateURL()
   }, [skip, limit, sortBy, sortOrder, selectedTag])
 
@@ -98,9 +88,12 @@ const PostsManager = () => {
                   className="pl-8"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyPress={(e) =>
-                    e.key === "Enter" && searchPosts(searchQuery, setTotal, () => loadData(limit, skip, setTotal))
-                  }
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      // React Query가 자동으로 searchQuery 변경을 감지하여 refetch 합니다
+                      updateURL()
+                    }
+                  }}
                 />
               </div>
             </div>
@@ -108,7 +101,6 @@ const PostsManager = () => {
               value={selectedTag}
               onValueChange={(value) => {
                 setSelectedTag(value)
-                fetchPostsByTag(value, limit, skip, setTotal, () => loadData(limit, skip, setTotal))
                 updateURL()
               }}
             >
@@ -147,7 +139,7 @@ const PostsManager = () => {
           </div>
 
           {/* 게시물 테이블 */}
-          {loading ? <div className="flex justify-center p-4">로딩 중...</div> : <PostList updateURL={updateURL} />}
+          <PostList updateURL={updateURL} />
 
           {/* 페이지네이션 */}
           <Pagination />

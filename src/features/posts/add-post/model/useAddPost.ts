@@ -1,31 +1,28 @@
-import { createPosts } from "../../../../entities/posts"
+import { useQueryClient } from "@tanstack/react-query"
 import { usePostDialogs } from "../../../../shared/store"
-import type { Post } from "../../../../entities/posts/api/types"
-import { useNewPost, usePosts } from "../../model"
+import { useNewPost } from "../../model"
+import { useAddPostMutation, postsKeys } from "../../model/queries"
 
 export const useAddPost = () => {
   const { newPost, setNewPost } = useNewPost()
-  const { posts, setPosts } = usePosts()
   const { setShowAddDialog } = usePostDialogs()
+  const addPostMutation = useAddPostMutation()
+  const queryClient = useQueryClient()
 
   const addPost = async () => {
     try {
-      const response = await createPosts(newPost)
-      const data = response.data
-
-      const newPostData: Post = {
-        ...data,
-        tags: [],
-        reactions: { likes: 0, dislikes: 0 },
-        views: 0,
-      }
-      setPosts([newPostData, ...posts])
-      setShowAddDialog(false)
+      await addPostMutation.mutateAsync(newPost)
+      
+      // 성공 시 처리
       setNewPost({ title: "", body: "", userId: 1 })
+      setShowAddDialog(false)
+      queryClient.invalidateQueries({ queryKey: postsKeys.lists() })
     } catch (error) {
       console.error("게시물 추가 오류:", error)
+      // 실패 시 롤백
+      queryClient.invalidateQueries({ queryKey: postsKeys.lists() })
     }
   }
 
-  return { addPost }
+  return { addPost, isLoading: addPostMutation.isPending }
 }

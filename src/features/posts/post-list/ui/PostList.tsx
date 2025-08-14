@@ -12,7 +12,7 @@ import {
 import { useSearchFilter } from "../../../../shared/store"
 import { Post } from "../../../../entities/posts/api/types"
 import { Users } from "../../../../entities/users/api/types"
-import { usePosts } from "../../model"
+import { usePostsQuery } from "../../model/queries"
 import { usePostList } from "../model/usePostList"
 import { useUserInfo } from "../../../user/user-info"
 import { usePostDetail } from "../../post-detail"
@@ -27,7 +27,7 @@ interface PostListProps {
 }
 
 export const PostList = (props: PostListProps) => {
-  const { posts } = usePosts()
+  const { data: postsData, isLoading, error } = usePostsQuery()
   const { filteredPostTag } = usePostList()
   const { selectedTag } = useSearchFilter()
   const { openUserModal } = useUserInfo()
@@ -35,6 +35,12 @@ export const PostList = (props: PostListProps) => {
   const { deletePost, openEditDialog } = useEditPost()
 
   const { searchQuery } = useSearchFilter()
+
+  if (isLoading) return <div className="flex justify-center p-4">로딩 중...</div>
+  if (error) return <div className="flex justify-center p-4">오류가 발생했습니다.</div>
+  if (!postsData?.posts) return <div className="flex justify-center p-4">게시물이 없습니다.</div>
+
+  const posts = postsData.posts
 
   return (
     <Table>
