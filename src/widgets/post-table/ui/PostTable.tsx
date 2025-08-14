@@ -18,7 +18,7 @@ interface PostTableProps {
   openUserModal: (userId: number) => Promise<void>
   openPostDetail: (post: PostsWithUsers) => void
   deletePost: (postId: number) => Promise<void>
-  filteredPostTag: (tag: any) => void
+  filteredPostTag: (tagName: string) => void
   openEditDialog: (selectedPost: PostsWithUsers, isEditDialog: boolean) => void
 }
 
@@ -74,6 +74,7 @@ export const PostTable = (props: PostTableProps) => {
               <div
                 className="flex items-center space-x-2 cursor-pointer"
                 onClick={() => {
+                  if (!post.author) return
                   openUserModal(post.author.id)
                 }}
               >

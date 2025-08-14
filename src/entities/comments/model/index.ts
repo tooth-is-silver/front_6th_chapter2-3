@@ -1,22 +1,19 @@
 import { axiosInstance } from "../../../shared/utils/axios"
 import {
-  CreateCommentsAddRequest,
-  CreateCommentsAddResponse,
-  UpdateCommentsRequest,
+  CreateCommentsRequest,
+  CreateCommentsResponse,
   UpdateCommentsResponse,
   UpdateCommentsLikesRequest,
   UpdateCommentsLikesResponse,
 } from "./types"
 
-export const createCommentsAdd = async (data: CreateCommentsAddRequest) => {
-  return axiosInstance.post<CreateCommentsAddResponse>(`/comments/add`, {
-    data,
-  })
+export const createComments = async (data: CreateCommentsRequest) => {
+  return axiosInstance.post<CreateCommentsResponse>(`/comments/add`, data)
 }
 
-export const updateComments = async (commentId: number, data: UpdateCommentsRequest) => {
+export const updateComments = async (commentId: number, body: string) => {
   return axiosInstance.put<UpdateCommentsResponse>(`/comments/${commentId}`, {
-    data,
+    body,
   })
 }
 

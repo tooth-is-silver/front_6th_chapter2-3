@@ -1,21 +1,17 @@
-export interface CreateCommentsAddRequest {
+export interface CreateCommentsRequest {
   body: string
-  postId: number
+  postId: number | null
   userId: number
 }
 
-export interface CreateCommentsAddResponse {
+export interface CreateCommentsResponse {
   body: string
   id: number
   postId: number
   user: { id: number; username: string; fullName: string }
 }
 
-export interface UpdateCommentsRequest {
-  body: string
-}
-
-export interface UpdateCommentsResponse extends CreateCommentsAddResponse {
+export interface UpdateCommentsResponse extends CreateCommentsResponse {
   likes: number
 }
 
@@ -23,6 +19,6 @@ export interface UpdateCommentsLikesRequest {
   likes: number
 }
 
-export interface UpdateCommentsLikesResponse extends CreateCommentsAddResponse {
+export interface UpdateCommentsLikesResponse extends CreateCommentsResponse {
   likes: number
 }

@@ -14,7 +14,7 @@ export interface CreatePostsResponse {
 }
 
 export interface UpdatePostsRequest {
-  id: number
+  id: number | null
 }
 
 export interface UpdatePostsResponse {
