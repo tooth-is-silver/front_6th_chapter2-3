@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction } from "react"
-import { SelectedPost } from "../../pages/posts/PostsManagerPage"
-import { Button, Dialog, DialogContent, DialogHeader, DialogTitle, Input, Textarea } from "../../shared/ui"
+import { SelectedPost } from "../../../pages/posts/PostsManagerPage"
+import { Button, Dialog, DialogContent, DialogHeader, DialogTitle, Input, Textarea } from "../../../shared/ui"
 
 interface EditPostDialogProps {
   selectedPost: SelectedPost

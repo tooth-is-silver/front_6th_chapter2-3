@@ -1,6 +1,15 @@
 import { Edit2, MessageSquare, ThumbsDown, ThumbsUp, Trash2 } from "lucide-react"
-import { TableHeader, Table, TableRow, TableHead, TableBody, TableCell, Button, highlightText } from "../../shared/ui"
-import { PostsWithUsers } from "../../pages/posts/PostsManagerPage"
+import {
+  TableHeader,
+  Table,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+  Button,
+  highlightText,
+} from "../../../shared/ui"
+import { PostsWithUsers } from "../../../pages/posts/PostsManagerPage"
 
 interface PostTableProps {
   posts: Array<PostsWithUsers>
