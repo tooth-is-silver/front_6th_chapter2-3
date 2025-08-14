@@ -1,13 +1,14 @@
 import { updatePosts } from "../../../../entities/posts"
 import { usePostDialogs } from "../../../../shared/store"
 import type { Post } from "../../../../entities/posts/api/types"
-import { SetStateAction } from "react"
-import { PostsWithUsers } from "../../post-list"
+import { usePosts, useSelectedPost } from "../../model"
 
 export const useEditPost = () => {
+  const { posts, setPosts } = usePosts()
+  const { selectedPost, setSelectedPost } = useSelectedPost()
   const { setShowEditDialog } = usePostDialogs()
 
-  const updatePost = async (selectedPost: Post, posts: Post[], setPosts: (value: SetStateAction<Post[]>) => void) => {
+  const updatePost = async (selectedPost: Post) => {
     if (!selectedPost) return
     try {
       const response = await updatePosts(selectedPost.id, selectedPost)
@@ -24,7 +25,7 @@ export const useEditPost = () => {
     }
   }
 
-  const deletePost = async (postId: number, posts: Post[], setPosts: (value: SetStateAction<Post[]>) => void) => {
+  const deletePost = async (postId: number) => {
     try {
       const { deletePosts } = await import("../../../../entities/posts")
       await deletePosts(postId)
@@ -34,10 +35,7 @@ export const useEditPost = () => {
     }
   }
 
-  const openEditDialog = (
-    selectedPost: PostsWithUsers,
-    setSelectedPost: (value: SetStateAction<Post | null>) => void,
-  ) => {
+  const openEditDialog = () => {
     setSelectedPost(selectedPost)
     setShowEditDialog(true)
   }

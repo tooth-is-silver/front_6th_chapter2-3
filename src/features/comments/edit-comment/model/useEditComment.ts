@@ -1,16 +1,14 @@
 import { updateComments } from "../../../../entities/comments"
 import { useCommentDialogs } from "../../../../shared/store"
 import type { Comments } from "../../../../entities/comments/api/types"
-import type { CommentsObj } from "../../comment-list/ui/CommentList"
-import { SetStateAction } from "react"
+import { useComments, useSelectedComment } from "../../model"
 
 export const useEditComment = () => {
+  const { setComments } = useComments()
+  const { selectedComment, setSelectedComment } = useSelectedComment()
   const { setShowEditCommentDialog } = useCommentDialogs()
 
-  const updateComment = async (
-    selectedComment: Comments | null,
-    setComments: (value: SetStateAction<CommentsObj>) => void,
-  ) => {
+  const updateComment = async () => {
     if (!selectedComment) return
 
     try {
@@ -27,10 +25,7 @@ export const useEditComment = () => {
     }
   }
 
-  const editPostComment = (
-    comment: Comments,
-    setSelectedComment: (value: React.SetStateAction<Comments | null>) => void,
-  ) => {
+  const editPostComment = (comment: Comments) => {
     setSelectedComment(comment)
     setShowEditCommentDialog(true)
   }

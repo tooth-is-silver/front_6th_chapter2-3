@@ -1,17 +1,14 @@
-import { Dispatch, SetStateAction } from "react"
 import { CreatePostsRequest } from "../../../../entities/posts"
 import { usePostDialogs } from "../../../../shared/store"
 import { Button, Dialog, DialogContent, DialogHeader, DialogTitle, Input, Textarea } from "../../../../shared/ui"
+import { useNewPost } from "../../model"
+import { useAddPost } from "../model/useAddPost"
 
 export type NewPost = CreatePostsRequest
 
-interface AddPostFormProps {
-  newPost: NewPost
-  setNewPost: Dispatch<SetStateAction<NewPost>>
-  addPost: (newPost: NewPost) => Promise<void>
-}
-export const AddPostForm = (props: AddPostFormProps) => {
-  const { newPost, setNewPost, addPost } = props
+export const AddPostForm = () => {
+  const { newPost, setNewPost } = useNewPost()
+  const { addPost } = useAddPost()
   const { showAddDialog, setShowAddDialog } = usePostDialogs()
 
   return (
@@ -38,7 +35,7 @@ export const AddPostForm = (props: AddPostFormProps) => {
             value={newPost.userId}
             onChange={(e) => setNewPost({ ...newPost, userId: Number(e.target.value) })}
           />
-          <Button onClick={() => addPost(newPost)}>게시물 추가</Button>
+          <Button onClick={addPost}>게시물 추가</Button>
         </div>
       </DialogContent>
     </Dialog>

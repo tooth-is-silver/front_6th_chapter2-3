@@ -12,23 +12,27 @@ import {
 import { useSearchFilter } from "../../../../shared/store"
 import { Post } from "../../../../entities/posts/api/types"
 import { Users } from "../../../../entities/users/api/types"
+import { usePosts } from "../../model"
+import { usePostList } from "../model/usePostList"
+import { useUserInfo } from "../../../user/user-info"
+import { usePostDetail } from "../../post-detail"
+import { useEditPost } from "../../edit-post"
 
 export interface PostsWithUsers extends Post {
   author?: Users | undefined
 }
 
 interface PostListProps {
-  posts: Array<PostsWithUsers>
-  selectedTag: string
-  openUserModal: (userId: number) => Promise<void>
-  openPostDetail: (post: PostsWithUsers) => void
-  deletePost: (postId: number) => Promise<void>
-  filteredPostTag: (tagName: string) => void
-  openEditDialog: (selectedPost: PostsWithUsers) => void
+  updateURL: () => void
 }
 
 export const PostList = (props: PostListProps) => {
-  const { posts, selectedTag, openUserModal, openPostDetail, filteredPostTag, deletePost, openEditDialog } = props
+  const { posts } = usePosts()
+  const { filteredPostTag } = usePostList()
+  const { selectedTag } = useSearchFilter()
+  const { openUserModal } = useUserInfo()
+  const { openPostDetail } = usePostDetail()
+  const { deletePost, openEditDialog } = useEditPost()
 
   const { searchQuery } = useSearchFilter()
 
@@ -44,7 +48,7 @@ export const PostList = (props: PostListProps) => {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {posts.map((post) => (
+        {posts.map((post: PostsWithUsers) => (
           <TableRow key={post.id}>
             <TableCell>{post.id}</TableCell>
             <TableCell>
@@ -60,7 +64,7 @@ export const PostList = (props: PostListProps) => {
                           ? "text-white bg-blue-500 hover:bg-blue-600"
                           : "text-blue-800 bg-blue-100 hover:bg-blue-200"
                       }`}
-                      onClick={() => filteredPostTag(tag)}
+                      onClick={() => filteredPostTag(tag, props.updateURL)}
                     >
                       {tag}
                     </span>
@@ -93,13 +97,7 @@ export const PostList = (props: PostListProps) => {
                 <Button variant="ghost" size="sm" onClick={() => openPostDetail(post)}>
                   <MessageSquare className="w-4 h-4" />
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    openEditDialog(post)
-                  }}
-                >
+                <Button variant="ghost" size="sm" onClick={openEditDialog}>
                   <Edit2 className="w-4 h-4" />
                 </Button>
                 <Button variant="ghost" size="sm" onClick={() => deletePost(post.id)}>

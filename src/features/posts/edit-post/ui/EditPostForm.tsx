@@ -1,17 +1,14 @@
-import { Dispatch, SetStateAction } from "react"
-import { Post } from "../../../../entities/posts"
 import { usePostDialogs } from "../../../../shared/store"
 import { DialogHeader, Input, Textarea, Button, Dialog, DialogContent, DialogTitle } from "../../../../shared/ui"
+import { useSelectedPost } from "../../model"
+import { useEditPost } from "../model/useEditPost"
 
-interface EditPostFormProps {
-  selectedPost: Post
-  setSelectedPost: Dispatch<SetStateAction<Post | null>>
-  updatePost: (selectedPost: Post) => Promise<void>
-}
-
-export const EditPostForm = (props: EditPostFormProps) => {
-  const { selectedPost, setSelectedPost, updatePost } = props
+export const EditPostForm = () => {
+  const { selectedPost, setSelectedPost } = useSelectedPost()
+  const { updatePost } = useEditPost()
   const { showEditDialog, setShowEditDialog } = usePostDialogs()
+
+  if (!selectedPost) return
 
   return (
     <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>

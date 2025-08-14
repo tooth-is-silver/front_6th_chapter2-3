@@ -6,13 +6,12 @@ import {
   UpdateCommentsLikesRequest,
 } from "../../../../entities/comments"
 import type { CommentsObj } from "../ui/CommentList"
+import { useComments } from "../../model"
 
 export const useCommentList = () => {
-  const fetchComments = async (
-    postId: number,
-    comments: CommentsObj,
-    setComments: (value: SetStateAction<CommentsObj>) => void,
-  ) => {
+  const { comments, setComments } = useComments()
+
+  const fetchComments = async (postId: number) => {
     if (comments[postId]) return // 이미 불러온 댓글이 있으면 다시 불러오지 않음
     try {
       const response = await getCommentsPost(postId)
@@ -23,11 +22,7 @@ export const useCommentList = () => {
     }
   }
 
-  const deletePostComment = async (
-    commentId: number,
-    postId: number,
-    setComments: (value: SetStateAction<CommentsObj>) => void,
-  ) => {
+  const deletePostComment = async (commentId: number, postId: number) => {
     try {
       await deleteComments(commentId)
       setComments((prev) => ({
@@ -39,12 +34,7 @@ export const useCommentList = () => {
     }
   }
 
-  const likeComment = async (
-    commentId: number,
-    postId: number,
-    comments: CommentsObj,
-    setComments: (value: SetStateAction<CommentsObj>) => void,
-  ) => {
+  const likeComment = async (commentId: number, postId: number) => {
     try {
       const body: UpdateCommentsLikesRequest = {
         likes:

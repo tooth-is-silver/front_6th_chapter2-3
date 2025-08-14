@@ -1,19 +1,14 @@
-import { createPosts, CreatePostsRequest } from "../../../../entities/posts"
+import { createPosts } from "../../../../entities/posts"
 import { usePostDialogs } from "../../../../shared/store"
-import type { NewPost } from "../ui/AddPostForm"
 import type { Post } from "../../../../entities/posts/api/types"
-import { Dispatch, SetStateAction } from "react"
-import { PostsWithUsers } from "../../post-list"
+import { useNewPost, usePosts } from "../../model"
 
 export const useAddPost = () => {
+  const { newPost, setNewPost } = useNewPost()
+  const { posts, setPosts } = usePosts()
   const { setShowAddDialog } = usePostDialogs()
 
-  const addPost = async (
-    newPost: NewPost,
-    posts: Post[],
-    setPosts: Dispatch<SetStateAction<Array<PostsWithUsers>>>,
-    setNewPost: (value: SetStateAction<CreatePostsRequest>) => void,
-  ) => {
+  const addPost = async () => {
     try {
       const response = await createPosts(newPost)
       const data = response.data

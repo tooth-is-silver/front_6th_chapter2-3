@@ -1,18 +1,14 @@
-import { Dispatch, SetStateAction } from "react"
 import { CreateCommentsRequest } from "../../../../entities/comments"
 import { useCommentDialogs } from "../../../../shared/store"
 import { DialogHeader, Textarea, Button, Dialog, DialogContent, DialogTitle } from "../../../../shared/ui"
+import { useNewComment } from "../../model"
+import { useAddComment } from "../model/useAddComment"
 
 export type NewComment = CreateCommentsRequest
 
-interface AddCommentFormProps {
-  newComment: NewComment
-  setNewComment: Dispatch<SetStateAction<NewComment>>
-  addComment: (newComment: NewComment) => Promise<void>
-}
-
-export const AddCommentForm = (props: AddCommentFormProps) => {
-  const { newComment, setNewComment, addComment } = props
+export const AddCommentForm = () => {
+  const { addComment } = useAddComment()
+  const { newComment, setNewComment } = useNewComment()
   const { showAddCommentDialog, setShowAddCommentDialog } = useCommentDialogs()
 
   return (
@@ -27,7 +23,7 @@ export const AddCommentForm = (props: AddCommentFormProps) => {
             value={newComment.body}
             onChange={(e) => setNewComment({ ...newComment, body: e.target.value })}
           />
-          <Button onClick={() => addComment(newComment)}>댓글 추가</Button>
+          <Button onClick={addComment}>댓글 추가</Button>
         </div>
       </DialogContent>
     </Dialog>

@@ -1,16 +1,11 @@
-import { Dispatch, SetStateAction } from "react"
-import { Comments } from "../../../../entities/comments"
 import { useCommentDialogs } from "../../../../shared/store"
 import { DialogHeader, Textarea, Button, Dialog, DialogContent, DialogTitle } from "../../../../shared/ui"
+import { useSelectedComment } from "../../model"
+import { useEditComment } from "../model/useEditComment"
 
-interface EditCommentFormProps {
-  selectedComment: Comments | null
-  setSelectedComment: Dispatch<SetStateAction<Comments | null>>
-  updateComment: (selectedComment: Comments | null) => Promise<void>
-}
-
-export const EditCommentForm = (props: EditCommentFormProps) => {
-  const { selectedComment, setSelectedComment, updateComment } = props
+export const EditCommentForm = () => {
+  const { selectedComment, setSelectedComment } = useSelectedComment()
+  const { updateComment } = useEditComment()
   const { showEditCommentDialog, setShowEditCommentDialog } = useCommentDialogs()
 
   if (!selectedComment) return
@@ -27,7 +22,7 @@ export const EditCommentForm = (props: EditCommentFormProps) => {
             value={selectedComment.body || ""}
             onChange={(e) => setSelectedComment({ ...selectedComment, body: e.target.value })}
           />
-          <Button onClick={() => updateComment(selectedComment)}>댓글 업데이트</Button>
+          <Button onClick={updateComment}>댓글 업데이트</Button>
         </div>
       </DialogContent>
     </Dialog>

@@ -2,23 +2,26 @@ import { Edit2, Plus, ThumbsUp, Trash2 } from "lucide-react"
 import { Button, highlightText } from "../../../../shared/ui"
 import { Comments } from "../../../../entities/comments/api/types"
 import { useSearchFilter } from "../../../../shared/store"
+import { useSelectedPost } from "../../../posts/model"
+import { useComments } from "../../model"
+import { useAddComment } from "../../add-comment"
+import { useEditComment } from "../../edit-comment"
+import { useCommentList } from "../model/useCommentList"
 
 export interface CommentsObj {
   [key: number]: Array<Comments>
 }
-
-interface CommentListProps {
-  postId: number
-  comments: CommentsObj
-  likeComment: (commentId: number, postId: number) => Promise<void>
-  addPostComment: (postId: number) => void
-  editPostComment: (comment: Comments) => void
-  deletePostComment: (commentId: number, postId: number) => Promise<void>
-}
-
-export const CommentList = (props: CommentListProps) => {
-  const { postId, likeComment, comments, addPostComment, editPostComment, deletePostComment } = props
+export const CommentList = () => {
+  const { comments } = useComments()
+  const { deletePostComment, likeComment } = useCommentList()
+  const { addPostComment } = useAddComment()
+  const { editPostComment } = useEditComment()
+  const { selectedPost } = useSelectedPost()
   const { searchQuery } = useSearchFilter()
+
+  if (!selectedPost) return
+
+  const postId = selectedPost.id
 
   return (
     <div className="mt-2">

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { Plus, Search } from "lucide-react"
 import { useLocation, useNavigate } from "react-router-dom"
 import {
@@ -14,40 +14,29 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../shared/ui"
-import { Post, PostsTags } from "../../entities/posts"
-import { Comments } from "../../entities/comments/api/types"
 import { usePagination, useSearchFilter, useLoading, usePostDialogs } from "../../shared/store"
-import { AddCommentForm, NewComment, useAddComment } from "../../features/comments/add-comment"
-import { AddPostForm, NewPost, useAddPost } from "../../features/posts/add-post"
-import { PostDetailDialog, usePostDetail } from "../../features/posts/post-detail"
+import { useTags } from "../../features/posts/model"
+import { AddCommentForm } from "../../features/comments/add-comment"
+import { AddPostForm } from "../../features/posts/add-post"
+import { PostDetailDialog } from "../../features/posts/post-detail"
 import { Pagination } from "../../widgets"
-import { PostList, usePostList, PostsWithUsers } from "../../features/posts/post-list"
-import { EditCommentForm, useEditComment } from "../../features/comments/edit-comment"
-import { EditPostForm, useEditPost } from "../../features/posts/edit-post"
-import { UserInfoDialog, useUserInfo } from "../../features/user/user-info"
-import { CommentList, CommentsObj } from "../../features/comments/comment-list/ui/CommentList"
-import { useCommentList } from "../../features/comments/comment-list"
+import { PostList, usePostList } from "../../features/posts/post-list"
+import { EditCommentForm } from "../../features/comments/edit-comment"
+import { EditPostForm } from "../../features/posts/edit-post"
+import { UserInfoDialog } from "../../features/user/user-info"
+import { CommentList } from "../../features/comments/comment-list/ui/CommentList"
 
 const PostsManager = () => {
   const navigate = useNavigate()
   const location = useLocation()
 
-  // 상태 관리
-  const [posts, setPosts] = useState<Array<Post>>([])
-  const [newPost, setNewPost] = useState<NewPost>({ title: "", body: "", userId: 1 })
   // 전역 상태 훅 사용
   const { skip, setSkip, limit, setLimit, setTotal } = usePagination()
   const { searchQuery, setSearchQuery, selectedTag, setSelectedTag, sortBy, setSortBy, sortOrder, setSortOrder } =
     useSearchFilter()
   const { loading } = useLoading()
   const { setShowAddDialog } = usePostDialogs()
-
-  // 로컬 상태
-  const [selectedPost, setSelectedPost] = useState<Post | null>(null)
-  const [tags, setTags] = useState<Array<PostsTags>>([])
-  const [comments, setComments] = useState<CommentsObj>({})
-  const [selectedComment, setSelectedComment] = useState<Comments | null>(null)
-  const [newComment, setNewComment] = useState<NewComment>({ body: "", postId: null, userId: 1 })
+  const { tags } = useTags()
 
   // URL 업데이트 함수
   const updateURL = () => {
@@ -60,25 +49,17 @@ const PostsManager = () => {
     if (selectedTag) params.set("tag", selectedTag)
     navigate(`?${params.toString()}`)
   }
-
-  const { deletePostComment, likeComment, fetchComments } = useCommentList()
-  const { addComment, addPostComment } = useAddComment()
-  const { updateComment, editPostComment } = useEditComment()
-  const { addPost } = useAddPost()
-  const { updatePost, deletePost, openEditDialog } = useEditPost()
-  const { openPostDetail } = usePostDetail()
-  const { loadData, searchPosts, fetchPostsByTag, fetchTags, filteredPostTag } = usePostList()
-  const { openUserModal } = useUserInfo()
+  const { loadData, searchPosts, fetchPostsByTag, fetchTags } = usePostList()
 
   useEffect(() => {
-    fetchTags(setTags)
+    fetchTags()
   }, [])
 
   useEffect(() => {
     if (selectedTag) {
-      fetchPostsByTag(selectedTag, limit, skip, setPosts, setTotal, () => loadData(limit, skip, setPosts, setTotal))
+      fetchPostsByTag(selectedTag, limit, skip, setTotal, () => loadData(limit, skip, setTotal))
     } else {
-      loadData(limit, skip, setPosts, setTotal)
+      loadData(limit, skip, setTotal)
     }
     updateURL()
   }, [skip, limit, sortBy, sortOrder, selectedTag])
@@ -118,8 +99,7 @@ const PostsManager = () => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyPress={(e) =>
-                    e.key === "Enter" &&
-                    searchPosts(searchQuery, setPosts, setTotal, () => loadData(limit, skip, setPosts, setTotal))
+                    e.key === "Enter" && searchPosts(searchQuery, setTotal, () => loadData(limit, skip, setTotal))
                   }
                 />
               </div>
@@ -128,7 +108,7 @@ const PostsManager = () => {
               value={selectedTag}
               onValueChange={(value) => {
                 setSelectedTag(value)
-                fetchPostsByTag(value, limit, skip, setPosts, setTotal, () => loadData(limit, skip, setPosts, setTotal))
+                fetchPostsByTag(value, limit, skip, setTotal, () => loadData(limit, skip, setTotal))
                 updateURL()
               }}
             >
@@ -167,21 +147,7 @@ const PostsManager = () => {
           </div>
 
           {/* 게시물 테이블 */}
-          {loading ? (
-            <div className="flex justify-center p-4">로딩 중...</div>
-          ) : (
-            <PostList
-              posts={posts}
-              selectedTag={selectedTag}
-              openUserModal={(userId: number) => openUserModal(userId)}
-              openPostDetail={(post: PostsWithUsers) =>
-                openPostDetail(post, setSelectedPost, fetchComments, comments, setComments)
-              }
-              deletePost={(postId: number) => deletePost(postId, posts, setPosts)}
-              filteredPostTag={(tagName: string) => filteredPostTag(tagName, setSelectedTag, updateURL)}
-              openEditDialog={(selectedPost: PostsWithUsers) => openEditDialog(selectedPost, setSelectedPost)}
-            />
-          )}
+          {loading ? <div className="flex justify-center p-4">로딩 중...</div> : <PostList updateURL={updateURL} />}
 
           {/* 페이지네이션 */}
           <Pagination />
@@ -189,53 +155,19 @@ const PostsManager = () => {
       </CardContent>
 
       {/* 게시물 추가 대화상자 */}
-      <AddPostForm
-        newPost={newPost}
-        setNewPost={setNewPost}
-        addPost={(newPost: NewPost) => addPost(newPost, posts, setPosts, setNewPost)}
-      />
+      <AddPostForm />
 
       {/* 게시물 수정 대화상자 */}
-      {selectedPost && (
-        <EditPostForm
-          selectedPost={selectedPost}
-          setSelectedPost={setSelectedPost}
-          updatePost={(selectedPost: Post) => updatePost(selectedPost, posts, setPosts)}
-        />
-      )}
+      <EditPostForm />
 
       {/* 댓글 추가 대화상자 */}
-      <AddCommentForm
-        newComment={newComment}
-        setNewComment={setNewComment}
-        addComment={(newComment: NewComment) => addComment(newComment, setComments, setNewComment)}
-      />
+      <AddCommentForm />
 
       {/* 댓글 수정 대화상자 */}
-      <EditCommentForm
-        selectedComment={selectedComment}
-        setSelectedComment={setSelectedComment}
-        updateComment={(selectedComment: Comments | null) => updateComment(selectedComment, setComments)}
-      />
+      <EditCommentForm />
 
       {/* 게시물 상세 보기 대화상자 */}
-      {selectedPost && (
-        <PostDetailDialog
-          selectedPost={selectedPost}
-          children={
-            <CommentList
-              postId={selectedPost.id}
-              comments={comments}
-              likeComment={(commentId: number, postId: number) => likeComment(commentId, postId, comments, setComments)}
-              addPostComment={(postId: number) => addPostComment(postId, setNewComment)}
-              editPostComment={(comment: Comments) => editPostComment(comment, setSelectedComment)}
-              deletePostComment={(commentId: number, postId: number) =>
-                deletePostComment(commentId, postId, setComments)
-              }
-            />
-          }
-        />
-      )}
+      <PostDetailDialog children={<CommentList />} />
 
       {/* 사용자 모달 */}
       <UserInfoDialog />

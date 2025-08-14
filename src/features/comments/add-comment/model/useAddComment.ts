@@ -1,17 +1,13 @@
-import { createComments, CreateCommentsRequest } from "../../../../entities/comments"
+import { createComments } from "../../../../entities/comments"
 import { useCommentDialogs } from "../../../../shared/store"
-import type { NewComment } from "../ui/AddCommentForm"
-import type { CommentsObj } from "../../comment-list/ui/CommentList"
-import { SetStateAction } from "react"
+import { useComments, useNewComment } from "../../model"
 
 export const useAddComment = () => {
+  const { newComment, setNewComment } = useNewComment()
+  const { setComments } = useComments()
   const { setShowAddCommentDialog } = useCommentDialogs()
 
-  const addComment = async (
-    newComment: NewComment,
-    setComments: (value: SetStateAction<CommentsObj>) => void,
-    setNewComment: (value: SetStateAction<CreateCommentsRequest>) => void,
-  ) => {
+  const addComment = async () => {
     try {
       const response = await createComments(newComment)
       const data = response.data
@@ -26,7 +22,7 @@ export const useAddComment = () => {
     }
   }
 
-  const addPostComment = (postId: number, setNewComment: (value: SetStateAction<CreateCommentsRequest>) => void) => {
+  const addPostComment = (postId: number) => {
     setNewComment((prev) => ({ ...prev, postId }))
     setShowAddCommentDialog(true)
   }

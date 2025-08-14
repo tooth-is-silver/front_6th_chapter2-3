@@ -1,11 +1,13 @@
 import { getPosts, getPostsParams, getPostsSearch, getPostsTags, getPostsTagTagName } from "../../../../entities/posts"
 import { getUsers, getUsersData, getUsersParams } from "../../../../entities/users"
-import { useLoading } from "../../../../shared/store"
-import type { PostsWithUsers } from "../ui/PostList"
-import type { Post, PostsTags } from "../../../../entities/posts/api/types"
+import { useLoading, useSearchFilter } from "../../../../shared/store"
 import { SetStateAction } from "react"
+import { usePosts, useTags } from "../../model"
 
 export const usePostList = () => {
+  const { setTags } = useTags()
+  const { setPosts } = usePosts()
+  const { setSelectedTag } = useSearchFilter()
   const { setLoading } = useLoading()
 
   const fetchPosts = async (limit: number, skip: number) => {
@@ -26,12 +28,7 @@ export const usePostList = () => {
     return response.data
   }
 
-  const loadData = async (
-    limit: number,
-    skip: number,
-    setPosts: (posts: PostsWithUsers[]) => void,
-    setTotal: (total: number) => void,
-  ) => {
+  const loadData = async (limit: number, skip: number, setTotal: (total: number) => void) => {
     try {
       setLoading(true)
       const postsRes = await fetchPosts(limit, skip)
@@ -53,7 +50,6 @@ export const usePostList = () => {
 
   const searchPosts = async (
     searchQuery: string,
-    setPosts: (value: SetStateAction<Array<Post>>) => void,
     setTotal: (total: SetStateAction<number>) => void,
     loadData: () => Promise<void>,
   ) => {
@@ -77,7 +73,6 @@ export const usePostList = () => {
     tagName: string,
     limit: number,
     skip: number,
-    setPosts: (value: SetStateAction<Array<Post>>) => void,
     setTotal: (total: SetStateAction<number>) => void,
     loadData: () => Promise<void>,
   ) => {
@@ -113,7 +108,7 @@ export const usePostList = () => {
     setLoading(false)
   }
 
-  const fetchTags = async (setTags: (tags: PostsTags[]) => void) => {
+  const fetchTags = async () => {
     try {
       const response = await getPostsTags()
       const data = response.data
@@ -123,7 +118,7 @@ export const usePostList = () => {
     }
   }
 
-  const filteredPostTag = (tagName: string, setSelectedTag: (tag: string) => void, updateURL: () => void) => {
+  const filteredPostTag = (tagName: string, updateURL: () => void) => {
     setSelectedTag(tagName)
     updateURL()
   }

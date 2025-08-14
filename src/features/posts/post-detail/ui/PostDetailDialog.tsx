@@ -1,18 +1,19 @@
 import { Dialog, DialogContent, DialogTitle } from "../../../../shared/ui"
 import { ReactNode } from "react"
-import { Post } from "../../../../entities/posts"
 import { useSearchFilter, usePostDialogs } from "../../../../shared/store"
 import { DialogHeader, highlightText } from "../../../../shared/ui"
+import { useSelectedPost } from "../../model"
 
 interface PostDetailDialogProps {
-  selectedPost: Post
   children: ReactNode
 }
 
 export const PostDetailDialog = (props: PostDetailDialogProps) => {
-  const { selectedPost, children } = props
+  const { selectedPost } = useSelectedPost()
   const { searchQuery } = useSearchFilter()
   const { showPostDetailDialog, setShowPostDetailDialog } = usePostDialogs()
+
+  if (!selectedPost) return
 
   return (
     <Dialog open={showPostDetailDialog} onOpenChange={setShowPostDetailDialog}>
@@ -22,7 +23,7 @@ export const PostDetailDialog = (props: PostDetailDialogProps) => {
         </DialogHeader>
         <div className="space-y-4">
           <p>{highlightText(selectedPost?.body, searchQuery)}</p>
-          {children}
+          {props.children}
         </div>
       </DialogContent>
     </Dialog>
