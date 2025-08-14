@@ -1,20 +1,19 @@
-import { Dispatch, SetStateAction } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../../shared/ui"
 import { UserInfo } from "../../../entities/users/api/types"
+import { useUserDialog } from "../../../shared/store/hooks"
 
 interface UserDialogProps {
-  showUserModal: boolean
-  setShowUserModal: Dispatch<SetStateAction<boolean>>
   selectedUser: UserInfo | null
 }
 
 export const UserDialog = (props: UserDialogProps) => {
-  const { showUserModal, setShowUserModal, selectedUser } = props
+  const { selectedUser } = props
+  const { showUserDialog, setShowUserDialog } = useUserDialog()
 
   if (!selectedUser) return
 
   return (
-    <Dialog open={showUserModal} onOpenChange={setShowUserModal}>
+    <Dialog open={showUserDialog} onOpenChange={setShowUserDialog}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>사용자 정보</DialogTitle>

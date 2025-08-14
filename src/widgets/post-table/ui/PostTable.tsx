@@ -10,10 +10,10 @@ import {
   highlightText,
 } from "../../../shared/ui"
 import { PostsWithUsers } from "../../../pages/posts/PostsManagerPage"
+import { useSearchFilter } from "../../../shared/store"
 
 interface PostTableProps {
   posts: Array<PostsWithUsers>
-  searchQuery: string
   selectedTag: string
   openUserModal: (userId: number) => Promise<void>
   openPostDetail: (post: PostsWithUsers) => void
@@ -23,16 +23,9 @@ interface PostTableProps {
 }
 
 export const PostTable = (props: PostTableProps) => {
-  const {
-    posts,
-    searchQuery,
-    selectedTag,
-    openUserModal,
-    openPostDetail,
-    filteredPostTag,
-    deletePost,
-    openEditDialog,
-  } = props
+  const { posts, selectedTag, openUserModal, openPostDetail, filteredPostTag, deletePost, openEditDialog } = props
+
+  const { searchQuery } = useSearchFilter()
 
   return (
     <Table>

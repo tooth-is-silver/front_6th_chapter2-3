@@ -2,10 +2,10 @@ import { Edit2, Plus, ThumbsUp, Trash2 } from "lucide-react"
 import { Button, highlightText } from "../../../shared/ui"
 import { Comments } from "../../../entities/comments/api/types"
 import { PostCommentsObj } from "../../../pages/posts/PostsManagerPage"
+import { useSearchFilter } from "../../../shared/store"
 
 interface PostCommentsProps {
   postId: number | null
-  searchQuery: string
   comments: PostCommentsObj
   likeComment: (commentId: number, postId: number) => Promise<void>
   addPostComment: (postId: number) => void
@@ -14,7 +14,8 @@ interface PostCommentsProps {
 }
 
 export const PostComments = (props: PostCommentsProps) => {
-  const { postId, searchQuery, likeComment, comments, addPostComment, editPostComment, deletePostComment } = props
+  const { postId, likeComment, comments, addPostComment, editPostComment, deletePostComment } = props
+  const { searchQuery } = useSearchFilter()
 
   if (!postId) return
 

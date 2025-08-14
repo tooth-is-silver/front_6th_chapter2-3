@@ -42,6 +42,14 @@ import {
 } from "../../widgets"
 import { Comments } from "../../entities/comments/api/types"
 import {
+  usePagination,
+  useSearchFilter,
+  useLoading,
+  usePostDialogs,
+  useCommentDialogs,
+  useUserDialog,
+} from "../../shared/store"
+import {
   createComments,
   CreateCommentsRequest,
   deleteComments,
@@ -72,39 +80,30 @@ export interface PostCommentsObj {
 const PostsManager = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const queryParams = new URLSearchParams(location.search)
 
   // 상태 관리
   const [posts, setPosts] = useState<Array<PostsWithUsers>>([])
   const [newPost, setNewPost] = useState<NewPost>({ title: "", body: "", userId: 1 })
-  const [total, setTotal] = useState(0)
-  const [skip, setSkip] = useState(parseInt(queryParams.get("skip") || "0"))
-  const [limit, setLimit] = useState(parseInt(queryParams.get("limit") || "10"))
-  const [searchQuery, setSearchQuery] = useState(queryParams.get("search") || "")
+  // 전역 상태 훅 사용
+  const { skip, setSkip, limit, setLimit, setTotal } = usePagination()
+  const { searchQuery, setSearchQuery, selectedTag, setSelectedTag, sortBy, setSortBy, sortOrder, setSortOrder } =
+    useSearchFilter()
+  const { loading, setLoading } = useLoading()
+  const { setShowAddDialog, setShowEditDialog, setShowPostDetailDialog } = usePostDialogs()
+  const { setShowAddCommentDialog, setShowEditCommentDialog } = useCommentDialogs()
+  const { setShowUserDialog } = useUserDialog()
+
+  // 로컬 상태
   const [selectedPost, setSelectedPost] = useState<SelectedPost>({
     id: null,
     title: "",
     body: "",
   })
-  const [loading, setLoading] = useState(false)
   const [tags, setTags] = useState<Array<PostsTags>>([])
-  const [selectedTag, setSelectedTag] = useState(queryParams.get("tag") || "")
   const [comments, setComments] = useState<PostCommentsObj>({})
   const [selectedComment, setSelectedComment] = useState<Comments | null>(null)
   const [newComment, setNewComment] = useState<NewComment>({ body: "", postId: null, userId: 1 })
   const [selectedUser, setSelectedUser] = useState<UserInfo | null>(null)
-
-  // 전역 상태 queryParams
-  const [sortBy, setSortBy] = useState(queryParams.get("sortBy") || "")
-  const [sortOrder, setSortOrder] = useState(queryParams.get("sortOrder") || "asc")
-
-  // 전역 상태 dialog
-  const [showAddDialog, setShowAddDialog] = useState(false)
-  const [showEditDialog, setShowEditDialog] = useState(false)
-  const [showAddCommentDialog, setShowAddCommentDialog] = useState(false)
-  const [showEditCommentDialog, setShowEditCommentDialog] = useState(false)
-  const [showPostDetailDialog, setShowPostDetailDialog] = useState(false)
-  const [showUserModal, setShowUserModal] = useState(false)
 
   // URL 업데이트 함수
   const updateURL = () => {
@@ -271,12 +270,6 @@ const PostsManager = () => {
     try {
       const response = await createComments(newComment)
       const data = response.data
-      // const response = await fetch("/api/comments/add", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify(newComment),
-      // })
-      // const data = await response.json()
       setComments((prev) => ({
         ...prev,
         [data.postId]: [...(prev[data.postId] || []), data],
@@ -355,7 +348,7 @@ const PostsManager = () => {
       const userData = response.data
       // setState부분은 useMutation에서 onSuccess로 전달
       setSelectedUser(userData)
-      setShowUserModal(true)
+      setShowUserDialog(true)
     } catch (error) {
       console.error("사용자 정보 가져오기 오류:", error)
     }
@@ -394,6 +387,7 @@ const PostsManager = () => {
     updateURL()
   }, [skip, limit, sortBy, sortOrder, selectedTag])
 
+  // URL 파라미터 초기화
   useEffect(() => {
     const params = new URLSearchParams(location.search)
     setSkip(parseInt(params.get("skip") || "0"))
@@ -402,7 +396,7 @@ const PostsManager = () => {
     setSortBy(params.get("sortBy") || "")
     setSortOrder(params.get("sortOrder") || "asc")
     setSelectedTag(params.get("tag") || "")
-  }, [location.search])
+  }, [location.search, setSkip, setLimit, setSearchQuery, setSortBy, setSortOrder, setSelectedTag])
 
   return (
     <Card className="w-full max-w-6xl mx-auto">
@@ -479,7 +473,6 @@ const PostsManager = () => {
           ) : (
             <PostTable
               posts={posts}
-              searchQuery={searchQuery}
               selectedTag={selectedTag}
               openUserModal={openUserModal}
               openPostDetail={openPostDetail}
@@ -490,56 +483,32 @@ const PostsManager = () => {
           )}
 
           {/* 페이지네이션 */}
-          <Pagination limit={limit} setLimit={setLimit} skip={skip} setSkip={setSkip} total={total} />
+          <Pagination />
         </div>
       </CardContent>
 
       {/* 게시물 추가 대화상자 */}
-      <AddPostDialog
-        newPost={newPost}
-        setNewPost={setNewPost}
-        showAddDialog={showAddDialog}
-        setShowAddDialog={setShowAddDialog}
-        addPost={addPost}
-      />
+      <AddPostDialog newPost={newPost} setNewPost={setNewPost} addPost={addPost} />
 
       {/* 게시물 수정 대화상자 */}
-      <EditPostDialog
-        selectedPost={selectedPost}
-        setSelectedPost={setSelectedPost}
-        showEditDialog={showEditDialog}
-        setShowEditDialog={setShowEditDialog}
-        updatePost={updatePost}
-      />
+      <EditPostDialog selectedPost={selectedPost} setSelectedPost={setSelectedPost} updatePost={updatePost} />
 
       {/* 댓글 추가 대화상자 */}
-      <AddCommentDialog
-        newComment={newComment}
-        setNewComment={setNewComment}
-        showAddCommentDialog={showAddCommentDialog}
-        setShowAddCommentDialog={setShowAddCommentDialog}
-        addComment={addComment}
-      />
+      <AddCommentDialog newComment={newComment} setNewComment={setNewComment} addComment={addComment} />
 
       {/* 댓글 수정 대화상자 */}
       <EditCommentDialog
         selectedComment={selectedComment}
         setSelectedComment={setSelectedComment}
-        showEditCommentDialog={showEditCommentDialog}
-        setShowEditCommentDialog={setShowEditCommentDialog}
         updateComment={updateComment}
       />
 
       {/* 게시물 상세 보기 대화상자 */}
       <PostDetailDialog
-        showPostDetailDialog={showPostDetailDialog}
-        setShowPostDetailDialog={setShowPostDetailDialog}
         selectedPost={selectedPost}
-        searchQuery={searchQuery}
         children={
           <PostComments
             postId={selectedPost?.id}
-            searchQuery={searchQuery}
             comments={comments}
             likeComment={likeComment}
             addPostComment={addPostComment}
@@ -550,7 +519,7 @@ const PostsManager = () => {
       />
 
       {/* 사용자 모달 */}
-      <UserDialog showUserModal={showUserModal} setShowUserModal={setShowUserModal} selectedUser={selectedUser} />
+      <UserDialog selectedUser={selectedUser} />
     </Card>
   )
 }

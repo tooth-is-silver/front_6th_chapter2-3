@@ -1,17 +1,17 @@
-import { Dispatch, ReactNode, SetStateAction } from "react"
+import { ReactNode } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, highlightText } from "../../../shared/ui"
 import { SelectedPost } from "../../../pages/posts/PostsManagerPage"
+import { usePostDialogs, useSearchFilter } from "../../../shared/store"
 
 interface PostDetailDialogProps {
-  showPostDetailDialog: boolean
-  setShowPostDetailDialog: Dispatch<SetStateAction<boolean>>
   selectedPost: SelectedPost
-  searchQuery: string
   children: ReactNode
 }
 
 export const PostDetailDialog = (props: PostDetailDialogProps) => {
-  const { showPostDetailDialog, setShowPostDetailDialog, selectedPost, searchQuery, children } = props
+  const { selectedPost, children } = props
+  const { searchQuery } = useSearchFilter()
+  const { showPostDetailDialog, setShowPostDetailDialog } = usePostDialogs()
 
   return (
     <Dialog open={showPostDetailDialog} onOpenChange={setShowPostDetailDialog}>

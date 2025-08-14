@@ -1,17 +1,17 @@
 import { Dispatch, SetStateAction } from "react"
 import { Comments } from "../../../entities/comments"
 import { Button, Dialog, DialogContent, DialogHeader, DialogTitle, Textarea } from "../../../shared/ui"
+import { useCommentDialogs } from "../../../shared/store"
 
 interface EditCommentDialogProps {
   selectedComment: Comments | null
   setSelectedComment: Dispatch<SetStateAction<Comments | null>>
-  showEditCommentDialog: boolean
-  setShowEditCommentDialog: Dispatch<SetStateAction<boolean>>
   updateComment: () => Promise<void>
 }
 
 export const EditCommentDialog = (props: EditCommentDialogProps) => {
-  const { selectedComment, setSelectedComment, showEditCommentDialog, setShowEditCommentDialog, updateComment } = props
+  const { selectedComment, setSelectedComment, updateComment } = props
+  const { showEditCommentDialog, setShowEditCommentDialog } = useCommentDialogs()
 
   if (!selectedComment) return
 

@@ -1,16 +1,8 @@
-import { Dispatch, SetStateAction } from "react"
 import { Button, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../shared/ui"
+import { usePagination } from "../../../shared/store"
 
-interface PaginationProps {
-  limit: number
-  setLimit: Dispatch<SetStateAction<number>>
-  skip: number
-  setSkip: Dispatch<SetStateAction<number>>
-  total: number
-}
-
-export const Pagination = (props: PaginationProps) => {
-  const { limit, setLimit, skip, setSkip, total } = props
+export const Pagination = () => {
+  const { limit, setLimit, skip, setSkip, total } = usePagination()
   return (
     <div className="flex justify-between items-center">
       <div className="flex items-center gap-2">

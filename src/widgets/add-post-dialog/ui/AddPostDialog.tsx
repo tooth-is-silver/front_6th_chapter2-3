@@ -1,17 +1,17 @@
 import { Dispatch, SetStateAction } from "react"
 import { NewPost } from "../../../pages/posts/PostsManagerPage"
 import { Button, Dialog, DialogContent, DialogHeader, DialogTitle, Input, Textarea } from "../../../shared/ui"
+import { usePostDialogs } from "../../../shared/store"
 
 interface AddPostDialogProps {
   newPost: NewPost
   setNewPost: Dispatch<SetStateAction<NewPost>>
-  showAddDialog: boolean
-  setShowAddDialog: Dispatch<SetStateAction<boolean>>
   addPost: () => Promise<void>
 }
 
 export const AddPostDialog = (props: AddPostDialogProps) => {
-  const { newPost, setNewPost, showAddDialog, setShowAddDialog, addPost } = props
+  const { newPost, setNewPost, addPost } = props
+  const { showAddDialog, setShowAddDialog } = usePostDialogs()
 
   return (
     <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>

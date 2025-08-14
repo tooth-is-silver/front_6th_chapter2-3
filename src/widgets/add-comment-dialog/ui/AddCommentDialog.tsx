@@ -1,17 +1,18 @@
 import { Dispatch, SetStateAction } from "react"
 import { Button, Dialog, DialogContent, DialogHeader, DialogTitle, Textarea } from "../../../shared/ui"
 import { NewComment } from "../../../pages/posts/PostsManagerPage"
+import { useCommentDialogs } from "../../../shared/store"
 
 interface AddCommentDialogProps {
   newComment: NewComment
   setNewComment: Dispatch<SetStateAction<NewComment>>
-  showAddCommentDialog: boolean
-  setShowAddCommentDialog: Dispatch<SetStateAction<boolean>>
   addComment: () => Promise<void>
 }
 
 export const AddCommentDialog = (props: AddCommentDialogProps) => {
-  const { newComment, setNewComment, showAddCommentDialog, setShowAddCommentDialog, addComment } = props
+  const { newComment, setNewComment, addComment } = props
+  const { showAddCommentDialog, setShowAddCommentDialog } = useCommentDialogs()
+
   return (
     <Dialog open={showAddCommentDialog} onOpenChange={setShowAddCommentDialog}>
       <DialogContent>
