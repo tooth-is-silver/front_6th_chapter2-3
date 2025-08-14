@@ -201,7 +201,14 @@ const PostsManager = () => {
     try {
       const response = await createPosts(newPost)
       const data = response.data
-      setPosts([data, ...posts])
+
+      const newPostData: Post = {
+        ...data,
+        tags: [],
+        reactions: { likes: 0, dislikes: 0 },
+        views: 0,
+      }
+      setPosts([newPostData, ...posts])
       setShowAddDialog(false)
       setNewPost({ title: "", body: "", userId: 1 })
     } catch (error) {
@@ -215,7 +222,12 @@ const PostsManager = () => {
     try {
       const response = await updatePosts(selectedPost.id, selectedPost)
       const data = response.data
-      setPosts(posts.map((post) => (post.id === data.id ? data : post)))
+
+      const updatedPost: Post = {
+        ...data,
+        views: selectedPost.views,
+      }
+      setPosts(posts.map((post) => (post.id === updatedPost.id ? updatedPost : post)))
       setShowEditDialog(false)
     } catch (error) {
       console.error("게시물 업데이트 오류:", error)
@@ -251,7 +263,7 @@ const PostsManager = () => {
       const data = response.data
       setComments((prev) => ({
         ...prev,
-        [data.postId]: [...(prev[data.postId] || []), data],
+        [data.postId]: [...(prev[data.postId] || []), { ...data, likes: 0 }],
       }))
       setShowAddCommentDialog(false)
       setNewComment({ body: "", postId: null, userId: 1 })
