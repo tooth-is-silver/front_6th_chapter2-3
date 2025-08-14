@@ -1,14 +1,10 @@
 import { Dialog, DialogContent, DialogTitle } from "../../../../shared/ui"
-import { UserInfo } from "../../../../entities/users"
 import { useUserDialog } from "../../../../shared/store"
 import { DialogHeader } from "../../../../shared/ui"
+import { useUserInfo } from "../model/useUserInfo"
 
-interface UserInfoDialogProps {
-  selectedUser: UserInfo | null
-}
-
-export const UserInfoDialog = (props: UserInfoDialogProps) => {
-  const { selectedUser } = props
+export const UserInfoDialog = () => {
+  const { selectedUser } = useUserInfo()
   const { showUserDialog, setShowUserDialog } = useUserDialog()
 
   if (!selectedUser) return

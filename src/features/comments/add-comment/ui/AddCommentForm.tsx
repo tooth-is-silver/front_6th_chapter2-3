@@ -8,7 +8,7 @@ export type NewComment = CreateCommentsRequest
 interface AddCommentFormProps {
   newComment: NewComment
   setNewComment: Dispatch<SetStateAction<NewComment>>
-  addComment: () => Promise<void>
+  addComment: (newComment: NewComment) => Promise<void>
 }
 
 export const AddCommentForm = (props: AddCommentFormProps) => {
@@ -27,7 +27,7 @@ export const AddCommentForm = (props: AddCommentFormProps) => {
             value={newComment.body}
             onChange={(e) => setNewComment({ ...newComment, body: e.target.value })}
           />
-          <Button onClick={addComment}>댓글 추가</Button>
+          <Button onClick={() => addComment(newComment)}>댓글 추가</Button>
         </div>
       </DialogContent>
     </Dialog>

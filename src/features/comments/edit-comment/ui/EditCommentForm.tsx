@@ -6,7 +6,7 @@ import { DialogHeader, Textarea, Button, Dialog, DialogContent, DialogTitle } fr
 interface EditCommentFormProps {
   selectedComment: Comments | null
   setSelectedComment: Dispatch<SetStateAction<Comments | null>>
-  updateComment: () => Promise<void>
+  updateComment: (selectedComment: Comments | null) => Promise<void>
 }
 
 export const EditCommentForm = (props: EditCommentFormProps) => {
@@ -27,7 +27,7 @@ export const EditCommentForm = (props: EditCommentFormProps) => {
             value={selectedComment.body || ""}
             onChange={(e) => setSelectedComment({ ...selectedComment, body: e.target.value })}
           />
-          <Button onClick={updateComment}>댓글 업데이트</Button>
+          <Button onClick={() => updateComment(selectedComment)}>댓글 업데이트</Button>
         </div>
       </DialogContent>
     </Dialog>

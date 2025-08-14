@@ -24,7 +24,7 @@ interface PostListProps {
   openPostDetail: (post: PostsWithUsers) => void
   deletePost: (postId: number) => Promise<void>
   filteredPostTag: (tagName: string) => void
-  openEditDialog: (selectedPost: PostsWithUsers, isEditDialog: boolean) => void
+  openEditDialog: (selectedPost: PostsWithUsers) => void
 }
 
 export const PostList = (props: PostListProps) => {
@@ -97,7 +97,7 @@ export const PostList = (props: PostListProps) => {
                   variant="ghost"
                   size="sm"
                   onClick={() => {
-                    openEditDialog(post, true)
+                    openEditDialog(post)
                   }}
                 >
                   <Edit2 className="w-4 h-4" />

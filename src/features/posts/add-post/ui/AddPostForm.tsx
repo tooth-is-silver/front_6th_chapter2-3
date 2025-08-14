@@ -8,7 +8,7 @@ export type NewPost = CreatePostsRequest
 interface AddPostFormProps {
   newPost: NewPost
   setNewPost: Dispatch<SetStateAction<NewPost>>
-  addPost: () => Promise<void>
+  addPost: (newPost: NewPost) => Promise<void>
 }
 export const AddPostForm = (props: AddPostFormProps) => {
   const { newPost, setNewPost, addPost } = props
@@ -38,7 +38,7 @@ export const AddPostForm = (props: AddPostFormProps) => {
             value={newPost.userId}
             onChange={(e) => setNewPost({ ...newPost, userId: Number(e.target.value) })}
           />
-          <Button onClick={addPost}>게시물 추가</Button>
+          <Button onClick={() => addPost(newPost)}>게시물 추가</Button>
         </div>
       </DialogContent>
     </Dialog>

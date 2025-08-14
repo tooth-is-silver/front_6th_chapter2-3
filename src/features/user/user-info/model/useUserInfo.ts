@@ -1,12 +1,13 @@
+import { useState } from "react"
 import { getUserInfo } from "../../../../entities/users"
 import { useUserDialog } from "../../../../shared/store"
 import type { UserInfo } from "../../../../entities/users"
-import { SetStateAction } from "react"
 
 export const useUserInfo = () => {
+  const [selectedUser, setSelectedUser] = useState<UserInfo | null>(null)
   const { setShowUserDialog } = useUserDialog()
 
-  const openUserModal = async (userId: number, setSelectedUser: (value: SetStateAction<UserInfo | null>) => void) => {
+  const openUserModal = async (userId: number) => {
     try {
       const response = await getUserInfo(userId)
       const userData = response.data
@@ -17,5 +18,5 @@ export const useUserInfo = () => {
     }
   }
 
-  return { openUserModal }
+  return { openUserModal, selectedUser }
 }
