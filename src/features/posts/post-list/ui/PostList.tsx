@@ -97,7 +97,7 @@ export const PostList = (props: PostListProps) => {
                 <Button variant="ghost" size="sm" onClick={() => openPostDetail(post)}>
                   <MessageSquare className="w-4 h-4" />
                 </Button>
-                <Button variant="ghost" size="sm" onClick={openEditDialog}>
+                <Button variant="ghost" size="sm" onClick={() => openEditDialog(post)}>
                   <Edit2 className="w-4 h-4" />
                 </Button>
                 <Button variant="ghost" size="sm" onClick={() => deletePost(post.id)}>

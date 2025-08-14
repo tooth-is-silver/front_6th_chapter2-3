@@ -5,7 +5,7 @@ import { usePosts, useSelectedPost } from "../../model"
 
 export const useEditPost = () => {
   const { posts, setPosts } = usePosts()
-  const { selectedPost, setSelectedPost } = useSelectedPost()
+  const { setSelectedPost } = useSelectedPost()
   const { setShowEditDialog } = usePostDialogs()
 
   const updatePost = async (selectedPost: Post) => {
@@ -35,8 +35,8 @@ export const useEditPost = () => {
     }
   }
 
-  const openEditDialog = () => {
-    setSelectedPost(selectedPost)
+  const openEditDialog = (post: Post) => {
+    setSelectedPost(post)
     setShowEditDialog(true)
   }
 

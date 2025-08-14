@@ -3,14 +3,13 @@ import { useUserDialog } from "../../../../shared/store"
 import { useSelectedUser } from "../../model"
 
 export const useUserInfo = () => {
-  const { setSelectedUser } = useSelectedUser()
+  const { selectedUser, setSelectedUser } = useSelectedUser()
   const { setShowUserDialog } = useUserDialog()
 
   const openUserModal = async (userId: number) => {
     try {
       const response = await getUserInfo(userId)
       const userData = response.data
-      console.log(userData)
       setSelectedUser(userData)
       setShowUserDialog(true)
     } catch (error) {
@@ -18,5 +17,5 @@ export const useUserInfo = () => {
     }
   }
 
-  return { openUserModal }
+  return { openUserModal, selectedUser }
 }
