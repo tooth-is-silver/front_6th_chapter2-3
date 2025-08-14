@@ -1,20 +1,14 @@
-import { getUserInfo } from "../../../../entities/users"
 import { useUserDialog } from "../../../../shared/store"
 import { useSelectedUser } from "../../model"
+import type { UserInfo } from "../../../../entities/users/api/types"
 
 export const useUserInfo = () => {
   const { selectedUser, setSelectedUser } = useSelectedUser()
   const { setShowUserDialog } = useUserDialog()
 
-  const openUserModal = async (userId: number) => {
-    try {
-      const response = await getUserInfo(userId)
-      const userData = response.data
-      setSelectedUser(userData)
-      setShowUserDialog(true)
-    } catch (error) {
-      console.error("사용자 정보 가져오기 오류:", error)
-    }
+  const openUserModal = (userId: number) => {
+    setSelectedUser({ id: userId } as UserInfo)
+    setShowUserDialog(true)
   }
 
   return { openUserModal, selectedUser }
