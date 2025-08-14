@@ -28,3 +28,5 @@ export interface PostsTags {
   name: string
   url: string
 }
+
+export type getPostsTagParams = getPostsParams
