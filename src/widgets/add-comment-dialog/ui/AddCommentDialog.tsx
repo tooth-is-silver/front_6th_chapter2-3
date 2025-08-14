@@ -1,7 +1,9 @@
 import { Dispatch, SetStateAction } from "react"
 import { Button, Dialog, DialogContent, DialogHeader, DialogTitle, Textarea } from "../../../shared/ui"
-import { NewComment } from "../../../pages/posts/PostsManagerPage"
 import { useCommentDialogs } from "../../../shared/store"
+import { CreateCommentsRequest } from "../../../entities/comments/model/types"
+
+export type NewComment = CreateCommentsRequest
 
 interface AddCommentDialogProps {
   newComment: NewComment

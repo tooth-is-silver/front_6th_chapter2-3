@@ -9,8 +9,13 @@ import {
   Button,
   highlightText,
 } from "../../../shared/ui"
-import { PostsWithUsers } from "../../../pages/posts/PostsManagerPage"
 import { useSearchFilter } from "../../../shared/store"
+import { Post } from "../../../entities/posts/api/types"
+import { Users } from "../../../entities/users/api/types"
+
+export interface PostsWithUsers extends Post {
+  author?: Users | undefined
+}
 
 interface PostTableProps {
   posts: Array<PostsWithUsers>

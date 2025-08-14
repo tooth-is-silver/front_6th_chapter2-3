@@ -1,10 +1,10 @@
 import { ReactNode } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, highlightText } from "../../../shared/ui"
-import { SelectedPost } from "../../../pages/posts/PostsManagerPage"
 import { usePostDialogs, useSearchFilter } from "../../../shared/store"
+import { Post } from "../../../entities/posts"
 
 interface PostDetailDialogProps {
-  selectedPost: SelectedPost
+  selectedPost: Post
   children: ReactNode
 }
 

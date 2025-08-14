@@ -1,12 +1,12 @@
 import { Dispatch, SetStateAction } from "react"
-import { SelectedPost } from "../../../pages/posts/PostsManagerPage"
 import { Button, Dialog, DialogContent, DialogHeader, DialogTitle, Input, Textarea } from "../../../shared/ui"
 import { usePostDialogs } from "../../../shared/store"
+import { Post } from "../../../entities/posts"
 
 interface EditPostDialogProps {
-  selectedPost: SelectedPost
-  setSelectedPost: Dispatch<SetStateAction<SelectedPost>>
-  updatePost: () => Promise<void>
+  selectedPost: Post
+  setSelectedPost: Dispatch<SetStateAction<Post | null>>
+  updatePost: (selectedPost: Post) => Promise<void>
 }
 
 export const EditPostDialog = (props: EditPostDialogProps) => {
@@ -22,16 +22,16 @@ export const EditPostDialog = (props: EditPostDialogProps) => {
         <div className="space-y-4">
           <Input
             placeholder="제목"
-            value={selectedPost?.title || ""}
+            value={selectedPost.title || ""}
             onChange={(e) => setSelectedPost({ ...selectedPost, title: e.target.value })}
           />
           <Textarea
             rows={15}
             placeholder="내용"
-            value={selectedPost?.body || ""}
+            value={selectedPost.body || ""}
             onChange={(e) => setSelectedPost({ ...selectedPost, body: e.target.value })}
           />
-          <Button onClick={updatePost}>게시물 업데이트</Button>
+          <Button onClick={() => updatePost(selectedPost)}>게시물 업데이트</Button>
         </div>
       </DialogContent>
     </Dialog>

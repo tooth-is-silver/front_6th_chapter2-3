@@ -1,7 +1,9 @@
 import { Dispatch, SetStateAction } from "react"
-import { NewPost } from "../../../pages/posts/PostsManagerPage"
 import { Button, Dialog, DialogContent, DialogHeader, DialogTitle, Input, Textarea } from "../../../shared/ui"
 import { usePostDialogs } from "../../../shared/store"
+import { CreatePostsRequest } from "../../../entities/posts"
+
+export type NewPost = CreatePostsRequest
 
 interface AddPostDialogProps {
   newPost: NewPost

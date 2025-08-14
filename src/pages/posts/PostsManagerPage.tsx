@@ -16,7 +16,6 @@ import {
 } from "../../shared/ui"
 import {
   createPosts,
-  CreatePostsRequest,
   deletePosts,
   getPosts,
   getPostsParams,
@@ -28,7 +27,7 @@ import {
   PostsTags,
   updatePosts,
 } from "../../entities/posts"
-import { getUserInfo, getUsers, getUsersData, getUsersParams, UserInfo, Users } from "../../entities/users"
+import { getUserInfo, getUsers, getUsersData, getUsersParams, UserInfo } from "../../entities/users"
 import {
   AddPostDialog,
   EditPostDialog,
@@ -39,6 +38,10 @@ import {
   EditCommentDialog,
   PostDetailDialog,
   UserDialog,
+  PostsWithUsers,
+  NewPost,
+  NewComment,
+  PostCommentsObj,
 } from "../../widgets"
 import { Comments } from "../../entities/comments/api/types"
 import {
@@ -51,7 +54,6 @@ import {
 } from "../../shared/store"
 import {
   createComments,
-  CreateCommentsRequest,
   deleteComments,
   getCommentsPost,
   updateComments,
@@ -59,30 +61,12 @@ import {
   UpdateCommentsLikesRequest,
 } from "../../entities/comments"
 
-export interface PostsWithUsers extends Post {
-  author?: Users | undefined
-}
-
-export type NewPost = CreatePostsRequest
-
-export type NewComment = CreateCommentsRequest
-
-export interface SelectedPost {
-  id: number | null
-  title: string
-  body: string
-}
-
-export interface PostCommentsObj {
-  [key: number]: Array<Comments>
-}
-
 const PostsManager = () => {
   const navigate = useNavigate()
   const location = useLocation()
 
   // 상태 관리
-  const [posts, setPosts] = useState<Array<PostsWithUsers>>([])
+  const [posts, setPosts] = useState<Array<Post>>([])
   const [newPost, setNewPost] = useState<NewPost>({ title: "", body: "", userId: 1 })
   // 전역 상태 훅 사용
   const { skip, setSkip, limit, setLimit, setTotal } = usePagination()
@@ -94,11 +78,7 @@ const PostsManager = () => {
   const { setShowUserDialog } = useUserDialog()
 
   // 로컬 상태
-  const [selectedPost, setSelectedPost] = useState<SelectedPost>({
-    id: null,
-    title: "",
-    body: "",
-  })
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null)
   const [tags, setTags] = useState<Array<PostsTags>>([])
   const [comments, setComments] = useState<PostCommentsObj>({})
   const [selectedComment, setSelectedComment] = useState<Comments | null>(null)
@@ -177,7 +157,6 @@ const PostsManager = () => {
     try {
       const response = await getPostsSearch(searchQuery)
       const data = response.data
-      // react-query 적용 후 PostsWithUsers 타입이랑 맞추기
       setPosts(data.posts)
       setTotal(data.total)
     } catch (error) {
@@ -231,8 +210,8 @@ const PostsManager = () => {
   }
 
   // 게시물 업데이트
-  const updatePost = async () => {
-    if (!selectedPost.id) return
+  const updatePost = async (selectedPost: Post) => {
+    if (!selectedPost) return
     try {
       const response = await updatePosts(selectedPost.id, selectedPost)
       const data = response.data
@@ -491,7 +470,9 @@ const PostsManager = () => {
       <AddPostDialog newPost={newPost} setNewPost={setNewPost} addPost={addPost} />
 
       {/* 게시물 수정 대화상자 */}
-      <EditPostDialog selectedPost={selectedPost} setSelectedPost={setSelectedPost} updatePost={updatePost} />
+      {selectedPost && (
+        <EditPostDialog selectedPost={selectedPost} setSelectedPost={setSelectedPost} updatePost={updatePost} />
+      )}
 
       {/* 댓글 추가 대화상자 */}
       <AddCommentDialog newComment={newComment} setNewComment={setNewComment} addComment={addComment} />
@@ -504,19 +485,21 @@ const PostsManager = () => {
       />
 
       {/* 게시물 상세 보기 대화상자 */}
-      <PostDetailDialog
-        selectedPost={selectedPost}
-        children={
-          <PostComments
-            postId={selectedPost?.id}
-            comments={comments}
-            likeComment={likeComment}
-            addPostComment={addPostComment}
-            editPostComment={editPostComment}
-            deletePostComment={deletePostComment}
-          />
-        }
-      />
+      {selectedPost && (
+        <PostDetailDialog
+          selectedPost={selectedPost}
+          children={
+            <PostComments
+              postId={selectedPost.id}
+              comments={comments}
+              likeComment={likeComment}
+              addPostComment={addPostComment}
+              editPostComment={editPostComment}
+              deletePostComment={deletePostComment}
+            />
+          }
+        />
+      )}
 
       {/* 사용자 모달 */}
       <UserDialog selectedUser={selectedUser} />
