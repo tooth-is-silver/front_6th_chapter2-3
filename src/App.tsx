@@ -2,6 +2,7 @@ import { BrowserRouter as Router } from "react-router-dom"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import PostsManagerPage from "./pages/posts/PostsManagerPage.tsx"
 import { Footer, Header } from "./widgets"
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 
 // QueryClient 생성
 const queryClient = new QueryClient({
@@ -29,6 +30,7 @@ const App = () => {
           <Footer />
         </div>
       </Router>
+      <ReactQueryDevtools initialIsOpen={true} />
     </QueryClientProvider>
   )
 }
