@@ -1,5 +1,5 @@
 import { axiosInstance } from "../../../shared/utils/axios"
-import { getPostsParams, getPostsTagParams, PostsData, PostsTags } from "./types"
+import { getPostsParams, getPostsSearchParams, getPostsTagParams, PostsData, PostsTags } from "./types"
 
 export const getPosts = async (params: getPostsParams) => {
   const searchParams = new URLSearchParams({
@@ -23,9 +23,11 @@ export const getPostsTagTagName = async (tagName: string, params: getPostsTagPar
   return axiosInstance.get<PostsData>(`/posts/tag/${tagName}?${searchParams}`)
 }
 
-export const getPostsSearch = async (q: string) => {
+export const getPostsSearch = async (q: string, params?: getPostsSearchParams) => {
   const searchParams = new URLSearchParams({
     q: q ?? "",
+    limit: params?.limit?.toString() ?? "0",
+    skip: params?.skip ?? "0",
   })
 
   return axiosInstance.get<PostsData>(`/posts/search?${searchParams}`)

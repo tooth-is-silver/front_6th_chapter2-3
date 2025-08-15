@@ -30,3 +30,8 @@ export interface PostsTags {
 }
 
 export type getPostsTagParams = getPostsParams
+
+export interface getPostsSearchParams {
+  limit: string
+  skip: string
+}

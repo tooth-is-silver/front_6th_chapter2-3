@@ -30,16 +30,24 @@ export const tagsKeys = {
 
 export const usePostsQuery = () => {
   const { skip, limit, setTotal } = usePagination()
-  const { selectedTag } = useSearchFilter()
+  const { selectedTag, searchQuery } = useSearchFilter()
 
   const query = useQuery({
-    queryKey: selectedTag
-      ? postsKeys.byTag(selectedTag, { limit, skip: skip.toString() })
-      : postsKeys.list({ limit, skip: skip.toString() }),
+    queryKey: searchQuery
+      ? postsKeys.search(searchQuery)
+      : selectedTag
+        ? postsKeys.byTag(selectedTag, { limit, skip: skip.toString() })
+        : postsKeys.list({ limit, skip: skip.toString() }),
     queryFn: async () => {
-      const postsRes = selectedTag
-        ? await getPostsTagTagName(selectedTag, { limit, skip: skip.toString() })
-        : await getPosts({ limit, skip: skip.toString() })
+      let postsRes
+
+      if (searchQuery) {
+        postsRes = await getPostsSearch(searchQuery, { limit: limit.toString(), skip: skip.toString() })
+      } else if (selectedTag) {
+        postsRes = await getPostsTagTagName(selectedTag, { limit, skip: skip.toString() })
+      } else {
+        postsRes = await getPosts({ limit, skip: skip.toString() })
+      }
 
       const usersRes = await getUsers({ limit: 0, select: "username,image" })
       const { users: usersData } = usersRes.data

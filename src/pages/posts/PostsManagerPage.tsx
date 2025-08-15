@@ -59,7 +59,7 @@ const PostsManager = () => {
     const params = new URLSearchParams(location.search)
     setSkip(parseInt(params.get("skip") || "0"))
     setLimit(parseInt(params.get("limit") || "10"))
-    setSearchQuery(params.get("search") || "")
+    setSearchQuery(params.get("q") || "")
     setSortBy(params.get("sortBy") || "")
     setSortOrder(params.get("sortOrder") || "asc")
     setSelectedTag(params.get("tag") || "")
@@ -90,7 +90,6 @@ const PostsManager = () => {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
-                      // React Query가 자동으로 searchQuery 변경을 감지하여 refetch 합니다
                       updateURL()
                     }
                   }}
