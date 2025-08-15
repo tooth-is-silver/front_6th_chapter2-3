@@ -6,15 +6,13 @@ import {
   deleteComments,
   updateCommentsLikes,
   CreateCommentsRequest,
-  UpdateCommentsLikesRequest
 } from "../../../entities/comments"
 import type { Comments } from "../../../entities/comments/api/types"
-import type { CommentsObj } from "../comment-list/ui/CommentList"
 
 // Query Keys
 export const commentsKeys = {
-  all: ['comments'] as const,
-  lists: () => [...commentsKeys.all, 'list'] as const,
+  all: ["comments"] as const,
+  lists: () => [...commentsKeys.all, "list"] as const,
   list: (postId: number) => [...commentsKeys.lists(), postId] as const,
 }
 
@@ -54,9 +52,9 @@ export const useAddCommentMutation = () => {
           likes: 0,
           user: {
             id: newComment.userId,
-            username: 'You', // placeholder
-            fullName: 'You',
-          }
+            username: "You", // placeholder
+            fullName: "You",
+          },
         }
 
         return [...old, optimisticComment]
@@ -76,9 +74,9 @@ export const useUpdateCommentMutation = () => {
     onMutate: async ({ id, body }) => {
       // Find which post this comment belongs to
       const allCommentQueries = queryClient.getQueriesData({ queryKey: commentsKeys.lists() })
-      
+
       let commentPostId: number | null = null
-      for (const [queryKey, data] of allCommentQueries) {
+      for (const [, data] of allCommentQueries) {
         if (Array.isArray(data)) {
           const comment = data.find((c: Comments) => c.id === id)
           if (comment) {
@@ -96,10 +94,8 @@ export const useUpdateCommentMutation = () => {
       // Optimistic update
       queryClient.setQueryData(commentsKeys.list(commentPostId), (old: Comments[] | undefined) => {
         if (!old) return old
-        
-        return old.map((comment) => 
-          comment.id === id ? { ...comment, body } : comment
-        )
+
+        return old.map((comment) => (comment.id === id ? { ...comment, body } : comment))
       })
 
       return { previousComments, commentPostId }
@@ -107,7 +103,7 @@ export const useUpdateCommentMutation = () => {
   })
 }
 
-// Delete Comment Mutation  
+// Delete Comment Mutation
 export const useDeleteCommentMutation = () => {
   const queryClient = useQueryClient()
 
@@ -116,9 +112,9 @@ export const useDeleteCommentMutation = () => {
     onMutate: async (commentId) => {
       // Find which post this comment belongs to
       const allCommentQueries = queryClient.getQueriesData({ queryKey: commentsKeys.lists() })
-      
+
       let commentPostId: number | null = null
-      for (const [queryKey, data] of allCommentQueries) {
+      for (const [, data] of allCommentQueries) {
         if (Array.isArray(data)) {
           const comment = data.find((c: Comments) => c.id === commentId)
           if (comment) {
@@ -136,7 +132,7 @@ export const useDeleteCommentMutation = () => {
       // Optimistic update
       queryClient.setQueryData(commentsKeys.list(commentPostId), (old: Comments[] | undefined) => {
         if (!old) return old
-        
+
         return old.filter((comment) => comment.id !== commentId)
       })
 
@@ -150,14 +146,14 @@ export const useLikeCommentMutation = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ commentId, likes }: { commentId: number; likes: number }) => 
+    mutationFn: ({ commentId, likes }: { commentId: number; likes: number }) =>
       updateCommentsLikes(commentId, { likes }),
     onMutate: async ({ commentId, likes }) => {
       // Find which post this comment belongs to
       const allCommentQueries = queryClient.getQueriesData({ queryKey: commentsKeys.lists() })
-      
+
       let commentPostId: number | null = null
-      for (const [queryKey, data] of allCommentQueries) {
+      for (const [, data] of allCommentQueries) {
         if (Array.isArray(data)) {
           const comment = data.find((c: Comments) => c.id === commentId)
           if (comment) {
@@ -175,10 +171,8 @@ export const useLikeCommentMutation = () => {
       // Optimistic update
       queryClient.setQueryData(commentsKeys.list(commentPostId), (old: Comments[] | undefined) => {
         if (!old) return old
-        
-        return old.map((comment) => 
-          comment.id === commentId ? { ...comment, likes } : comment
-        )
+
+        return old.map((comment) => (comment.id === commentId ? { ...comment, likes } : comment))
       })
 
       return { previousComments, commentPostId }
