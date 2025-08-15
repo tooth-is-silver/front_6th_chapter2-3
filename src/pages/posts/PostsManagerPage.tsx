@@ -1,21 +1,8 @@
 import { useEffect } from "react"
-import { Plus, Search } from "lucide-react"
+import { Plus } from "lucide-react"
 import { useLocation, useNavigate } from "react-router-dom"
-import {
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Input,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../shared/ui"
+import { Button, Card, CardContent, CardHeader, CardTitle } from "../../shared/ui"
 import { usePagination, useSearchFilter, usePostDialogs } from "../../shared/store"
-import { useTagsQuery } from "../../features/posts/model/queries"
 import { AddCommentForm } from "../../features/comments/add-comment"
 import { AddPostForm } from "../../features/posts/add-post"
 import { PostDetailDialog } from "../../features/posts/post-detail"
@@ -25,6 +12,7 @@ import { EditCommentForm } from "../../features/comments/edit-comment"
 import { EditPostForm } from "../../features/posts/edit-post"
 import { UserInfoDialog } from "../../features/user/user-info"
 import { CommentList } from "../../features/comments/comment-list/ui/CommentList"
+import { SearchFilter } from "../../features/posts/search-filter"
 
 const PostsManager = () => {
   const navigate = useNavigate()
@@ -35,7 +23,6 @@ const PostsManager = () => {
   const { searchQuery, setSearchQuery, selectedTag, setSelectedTag, sortBy, setSortBy, sortOrder, setSortOrder } =
     useSearchFilter()
   const { setShowAddDialog } = usePostDialogs()
-  const { data: tags = [] } = useTagsQuery()
 
   // URL 업데이트 함수
   const updateURL = () => {
@@ -79,63 +66,7 @@ const PostsManager = () => {
       <CardContent>
         <div className="flex flex-col gap-4">
           {/* 검색 및 필터 컨트롤 */}
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="게시물 검색..."
-                  className="pl-8"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      updateURL()
-                    }
-                  }}
-                />
-              </div>
-            </div>
-            <Select
-              value={selectedTag}
-              onValueChange={(value) => {
-                setSelectedTag(value)
-                updateURL()
-              }}
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="태그 선택" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">모든 태그</SelectItem>
-                {tags.map((tag) => (
-                  <SelectItem key={tag.url} value={tag.slug}>
-                    {tag.slug}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="정렬 기준" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">없음</SelectItem>
-                <SelectItem value="id">ID</SelectItem>
-                <SelectItem value="title">제목</SelectItem>
-                <SelectItem value="reactions">반응</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={sortOrder} onValueChange={setSortOrder}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="정렬 순서" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="asc">오름차순</SelectItem>
-                <SelectItem value="desc">내림차순</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <SearchFilter updateURL={updateURL} />
 
           {/* 게시물 테이블 */}
           <PostList updateURL={updateURL} />
